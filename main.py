@@ -3,6 +3,7 @@ from pathlib import Path
 import cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt 
+import distance as dist
 
 debug = True
 debugPlus = False
@@ -149,3 +150,15 @@ if debug :
         print("[DEBUG] Echec du calcul du vecteur caractéristique de la requete")
         print("[DEBUG] Sorti du programme...")
         exit()
+    
+# Recherche ---------------------------------------------------------------------------------------------
+
+if debug :
+    print("[DEBUG] Brutte force knn")
+
+res = dist.knn_search(allDataHisto, histoQuery)
+
+resIndex = res[0][0]
+resDist = res[1][0]
+
+print("Brute force resultat : "+str(database[resIndex])+" distance : "+str(resDist))
