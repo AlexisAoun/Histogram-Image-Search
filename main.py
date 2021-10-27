@@ -2,24 +2,18 @@ import cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt 
 
-img = cv.imread('./data/small/images/10815824_2997e03d76.jpg', cv.IMREAD_COLOR)
+queryImg = cv.imread('./data/small/queries/152029243_b3582c36fa.jpg', cv.IMREAD_COLOR)
 
-rHisto = cv.calcHist([img], [0], None, [256], [0, 256])
-gHisto = cv.calcHist([img], [1], None, [256], [0, 256])
-bHisto = cv.calcHist([img], [2], None, [256], [0, 256])
+rHistoQuery = cv.calcHist([queryImg], [0], None, [256], [0, 256])
+gHistoQuery = cv.calcHist([queryImg], [1], None, [256], [0, 256])
+bHistoQuery = cv.calcHist([queryImg], [2], None, [256], [0, 256])
 
-rHisto = rHisto.flatten()
-gHisto = gHisto.flatten()
-bHisto = bHisto.flatten()
+rHistoQuery = rHistoQuery.flatten()
+gHistoQuery = gHistoQuery.flatten()
+bHistoQuery = bHistoQuery.flatten()
 
-rHisto = cv.normalize(rHisto, rHisto)
-gHisto = cv.normalize(gHisto, gHisto)
-bHisto = cv.normalize(bHisto, bHisto)
+rHistoQuery = cv.normalize(rHistoQuery, rHistoQuery)
+gHistoQuery = cv.normalize(gHistoQuery, gHistoQuery)
+bHistoQuery = cv.normalize(bHistoQuery, bHistoQuery)
 
-plt.plot(rHisto, color="r")
-plt.plot(gHisto, color="g")
-plt.plot(bHisto, color="b")
-plt.xlim([0,256])
-plt.show()
-
-histo = np.concatenate((rHisto, gHisto, bHisto))
+histoQuery = np.concatenate((rHistoQuery, gHistoQuery, bHistoQuery))
