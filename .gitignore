@@ -6,3 +6,4 @@ big/*
 small/*
 .vscode/*
 *.npy
+__pycache__/*
