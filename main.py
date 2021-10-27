@@ -5,10 +5,10 @@ import numpy as np
 from matplotlib import pyplot as plt 
 import distance as dist
 
-debug = True
+debug = False
 debugPlus = False
 
-queryPath = "./data/small/queries/152029243_b3582c36fa.jpg"
+queryPath = "./data/small/queries/2090339522_d30d2436f9.jpg"
 databasePath = "./data/small/images"
 numpyPath = Path("./save.npy")
 
@@ -154,11 +154,21 @@ if debug :
 # Recherche ---------------------------------------------------------------------------------------------
 
 if debug :
-    print("[DEBUG] Brutte force knn")
+    print("[DEBUG] Calcule Brute knn et radius L2")
 
-res = dist.knn_search(allDataHisto, histoQuery)
+resBruteKnnL2 = dist.knn_search(allDataHisto, histoQuery, k=3)
+resBruteRadiusL2 = dist.radius_search(allDataHisto, histoQuery, r=0.4)
 
-resIndex = res[0][0]
-resDist = res[1][0]
+print("Image requete : "+str(queryPath))
 
-print("Brute force resultat : "+str(database[resIndex])+" distance : "+str(resDist))
+print("Brute force knn L2")
+
+for i in range (len(resBruteKnnL2[0])) :
+
+    print("- Resultat "+str(i)+" : "+str(database[resBruteKnnL2[0][i]])+" distance : "+str(resBruteKnnL2[1][i]))
+
+print("")
+print("Brute force radius L2")
+for i in range (len(resBruteRadiusL2[0])) :
+
+    print("- Resultat "+str(i)+" : "+str(database[resBruteRadiusL2[0][i]])+" distance : "+str(resBruteRadiusL2[1][i]))
