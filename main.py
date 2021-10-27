@@ -14,7 +14,9 @@ numpyPath = Path("./save.npy")
 database = []
 i = 0
 for entry in os.scandir(databasePath) :
+
     if (entry.path.endswith(".jpg") or entry.path.endswith(".png")) and entry.is_file():
+
         database.append(str(entry.path))
         i += 1
 
@@ -45,15 +47,19 @@ def getImage (path, debug) :
         img = cv.imread(path, cv.IMREAD_COLOR)
 
     except ValueError:
+
         print("[DEBUG] Echec du chargement de l'image")
         print("[DEBUG] Sorti du programme...")
         exit()
 
     if debug and img is None :
+
         print("[DEBUG] Echec du chargement de l'image")
         print("[DEBUG] Sorti du programme...")
         exit()
+
     elif debug and img.all() != None :
+
         print("[DEBUG] Image chargée avec succés")
 
     return img 
@@ -66,6 +72,7 @@ def getImage (path, debug) :
 if numpyPath.is_file() :
 
     if debug :
+
         print("[DEBUG] Fichier de sauvegarde numpy trouvé") 
         print("[DEBUG] Chargement de la sauvegarde numpy...") 
 
@@ -74,13 +81,17 @@ if numpyPath.is_file() :
 
 
     if debug and allDataHisto is not None :
+
         print("[DEBUG] Sauvegarde numpy chargé avec succés")
+
     elif debug :
+
         print("[DEBUG] [ERROR] Echec du chargement de la sauvegarde numpy")
 
 else :
 
     if debug :
+
         print("[DEBUG] [WARNING] Fichier de sauvegarde numpy non trouvé") 
         print("[DEBUG] Traitement des images de la base de donnée - Cette operation peut prendre du temps") 
 
@@ -92,40 +103,49 @@ else :
     for path in database :
 
         if debugPlus :
+
             print("[DEBUG] Path actuel : "+path)
 
         allDataHisto[i] = computeHistoVector(getImage((path), debugPlus)) 
         i += 1
 
     if debug :
+
         print("[DEBUG] Traitement terminé") 
         print("[DEBUG] Sauvegarde du resultat du traitement...") 
 
     np.save(str(numpyPath), allDataHisto)
 
     if debug and numpyPath.is_file():
-        print("[DEBUG] Sauvegarde numpy terminé")
-    elif debug :
-        print("[DEBUG] [WARING] Echec de la sauvegarde numpy")
 
-print(str(allDataHisto[20]))
+        print("[DEBUG] Sauvegarde numpy terminé")
+
+    elif debug :
+
+        print("[DEBUG] [WARING] Echec de la sauvegarde numpy")
 
 # Traitement image requete --------------------------------------------------------------------------------
 
 if debug :
+
     print("[DEBUG] Chargement de l'image requete...")
 
 queryImg = getImage(str(queryPath), debug)
 
 if debug :
+
     print("[DEBUG] Calcule du vecteur carateristique de la requete...")
     
 histoQuery = computeHistoVector(queryImg)
 
 if debug : 
+
     if histoQuery is not None and histoQuery.shape == (768,) :
+
         print("[DEBUG] Vecteur carateristique de la requete calculé (shape OK)")
+
     else : 
+
         print("[DEBUG] Echec du calcul du vecteur caractéristique de la requete")
         print("[DEBUG] Sorti du programme...")
         exit()
