@@ -1,4 +1,6 @@
 import numpy as np
+from numpy.lib.function_base import quantile
+
 
 def compute_distances(data, query, dist="L2"):
     """ Compute distances.
@@ -15,7 +17,12 @@ def compute_distances(data, query, dist="L2"):
         distances = np.sqrt(np.sum((data - query)**2, axis=1))
     elif dist == "inf":
         distances = np.max(np.abs(data - query), axis=1)
+    elif dist == "inter":
+        distances = np.sum(np.minimum(data, query), axis=0)
+    elif dist == "chi2":
+        distances = np.sum((data-query)**2 / (data+query), axis=0)
     return distances
+
 
 def knn_search(data, query, k=1, dist='L2'):
     """Brute force version of knn"""
@@ -26,6 +33,7 @@ def knn_search(data, query, k=1, dist='L2'):
     else:
         min_idx = np.argpartition(distances, k)[:k]
         return min_idx, distances[min_idx]
+
 
 def radius_search(data, query, r=1., norm='L2'):
     """ Brute-force radius search"""
