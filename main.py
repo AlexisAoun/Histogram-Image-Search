@@ -15,7 +15,7 @@ database = []
 i = 0
 for entry in os.scandir(databasePath) :
     if (entry.path.endswith(".jpg") or entry.path.endswith(".png")) and entry.is_file():
-        database.append(entry.path)
+        database.append(str(entry.path))
         i += 1
 
 databaseSize = i
@@ -41,7 +41,9 @@ def computeHistoVector (inputImage) :
 def getImage (path, debug) :
 
     try : 
+
         img = cv.imread(path, cv.IMREAD_COLOR)
+
     except ValueError:
         print("[DEBUG] Echec du chargement de l'image")
         print("[DEBUG] Sorti du programme...")
@@ -62,11 +64,14 @@ def getImage (path, debug) :
 
 
 if numpyPath.is_file() :
+
     if debug :
         print("[DEBUG] Fichier de sauvegarde numpy trouvé") 
         print("[DEBUG] Chargement de la sauvegarde numpy...") 
 
+
     allDataHisto = np.load(str(numpyPath))
+
 
     if debug and allDataHisto is not None :
         print("[DEBUG] Sauvegarde numpy chargé avec succés")
@@ -74,18 +79,22 @@ if numpyPath.is_file() :
         print("[DEBUG] [ERROR] Echec du chargement de la sauvegarde numpy")
 
 else :
+
     if debug :
         print("[DEBUG] [WARNING] Fichier de sauvegarde numpy non trouvé") 
         print("[DEBUG] Traitement des images de la base de donnée - Cette operation peut prendre du temps") 
 
+
     allDataHisto = np.ndarray(shape=(databaseSize , 768))
     i = 0
 
-    for path in database :
-        if debugPlus :
-            print("[DEBUG] Path actuel : "+str(path))
 
-        allDataHisto[i] = computeHistoVector(getImage(str(path), debugPlus)) 
+    for path in database :
+
+        if debugPlus :
+            print("[DEBUG] Path actuel : "+path)
+
+        allDataHisto[i] = computeHistoVector(getImage((path), debugPlus)) 
         i += 1
 
     if debug :
@@ -99,7 +108,10 @@ else :
     elif debug :
         print("[DEBUG] [WARING] Echec de la sauvegarde numpy")
 
+print(str(allDataHisto[20]))
+
 # Traitement image requete --------------------------------------------------------------------------------
+
 if debug :
     print("[DEBUG] Chargement de l'image requete...")
 

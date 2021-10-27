@@ -5,3 +5,4 @@ data/*
 big/*
 small/*
 .vscode/*
+*.npy
