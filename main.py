@@ -43,7 +43,7 @@ elif debug and queryImg.all() != None :
 if debug :
     print("[DEBUG] Calcule du vecteur carateristique de la requete...")
     
-    histoQuery = computeHistoVector(queryImg)
+histoQuery = computeHistoVector(queryImg)
 
 if debug : 
     if histoQuery is not None and histoQuery.shape == (768,) :
