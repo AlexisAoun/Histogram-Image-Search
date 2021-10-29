@@ -4,6 +4,7 @@ import cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt
 import distance as dist
+import lsh as LSH
 
 debug = True
 debugPlus = False
@@ -63,7 +64,7 @@ def getImage(path, debug):
 
     elif debug and img.all() != None:
 
-        print("[DEBUG] Image chargée avec succés")
+        print("[DEBUG] Image chargee avec succes")
 
     return img
 
@@ -76,14 +77,14 @@ if numpyPath.is_file():
 
     if debug:
 
-        print("[DEBUG] Fichier de sauvegarde numpy trouvé")
+        print("[DEBUG] Fichier de sauvegarde numpy detecte")
         print("[DEBUG] Chargement de la sauvegarde numpy...")
 
     allDataHisto = np.load(str(numpyPath))
 
     if debug and allDataHisto is not None:
 
-        print("[DEBUG] Sauvegarde numpy chargé avec succés")
+        print("[DEBUG] Sauvegarde numpy chargé avec succes")
 
     elif debug:
 
@@ -93,8 +94,8 @@ else:
 
     if debug:
 
-        print("[DEBUG] [WARNING] Fichier de sauvegarde numpy non trouvé")
-        print("[DEBUG] Traitement des images de la base de donnée - Cette operation peut prendre du temps")
+        print("[DEBUG] [WARNING] Aucun fichier de sauvegarde numpy detecte")
+        print("[DEBUG] Traitement des images de la base de donnee - Cette operation peut prendre du temps")
 
     allDataHisto = np.ndarray(shape=(databaseSize, 768))
     i = 0
@@ -110,14 +111,14 @@ else:
 
     if debug:
 
-        print("[DEBUG] Traitement terminé")
+        print("[DEBUG] Traitement termine")
         print("[DEBUG] Sauvegarde du resultat du traitement...")
 
     np.save(str(numpyPath), allDataHisto)
 
     if debug and numpyPath.is_file():
 
-        print("[DEBUG] Sauvegarde numpy terminé")
+        print("[DEBUG] Sauvegarde numpy termine")
 
     elif debug:
 
@@ -141,11 +142,11 @@ if debug:
 
     if histoQuery is not None and histoQuery.shape == (768,):
 
-        print("[DEBUG] Vecteur carateristique de la requete calculé (shape OK)")
+        print("[DEBUG] Vecteur carateristique de la requete calcule (shape OK)")
 
     else:
 
-        print("[DEBUG] Echec du calcul du vecteur caractéristique de la requete")
+        print("[DEBUG] Echec du calcul du vecteur caracteristique de la requete")
         print("[DEBUG] Sorti du programme...")
         exit()
 
@@ -172,3 +173,20 @@ for i in range(len(resBruteRadiusL2[0])):
 
     print("- Resultat "+str(i)+" : " +
           str(database[resBruteRadiusL2[0][i]])+" distance : "+str(resBruteRadiusL2[1][i]))
+
+w = 1
+nbProjections = 2
+nbTabHash = 1
+
+print("")
+print("Recherche LSH : W = "+str(w)+" nb projections : "+str(nbProjections))
+
+lsh = LSH.LSH(nb_projections=nbProjections, nb_tables=nbTabHash, w=w)
+lsh.fit(allDataHisto)
+
+lshRes = lsh.kneighbors(histoQuery, k=3)
+
+for i in range(len(lshRes[0])):
+
+    print("- Resultat "+str(i)+" : " +
+          str(database[lshRes[1][i]])+" distance : "+str(lshRes[0][i]))
