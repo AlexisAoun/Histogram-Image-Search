@@ -6,15 +6,14 @@ import cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt
 import distance as dist
+import timeit
 
 
-debug = True
+debug = False
 debugPlus = False
 
-dimensionArivee = 256
-
 queryPath = "./data/small/queries/2090339522_d30d2436f9.jpg"
-databasePath = "./data/small/images"
+databasePath = "./data/big/images"
 numpyPath = Path("./save.npy")
 
 database = []
@@ -179,8 +178,10 @@ for i in range(len(resBruteRadiusL2[0])):
     print("- Resultat "+str(i)+" : " +
           str(database[resBruteRadiusL2[0][i]])+" distance : "+str(resBruteRadiusL2[1][i]))
 
+
+# LSH
 w = 1
-nbProjections = 2
+nbProjections = 12
 nbTabHash = 1
 
 print("")
@@ -195,8 +196,60 @@ for i in range(len(lshRes[0])):
 
     print("- Resultat "+str(i)+" : " +
           str(database[lshRes[1][i]])+" distance : "+str(lshRes[0][i]))
-# ACP
 
+
+# ACP, mesure de la précision et du temps d'execution
+dimMax = 150
+dimMin = 140
+dimValues = [i for i in range(dimMin, dimMax+1)]
+precision = np.zeros_like(dimValues, dtype=np.float32)
+time = np.zeros_like(dimValues, dtype=np.float32)
+
+count = 0
+start = timeit.default_timer()
+for dimensionArivee in range(dimMin, dimMax+1):
+
+    pca = PCA(n_components=dimensionArivee)
+    dataPCA = pca.fit_transform(allDataHisto)
+
+    histoQueryPCA = histoQuery - pca.mean_
+    VecteurP = pca.components_
+    histoQueryPCA = histoQueryPCA@VecteurP.T
+
+    resBruteKnnACP = dist.knn_search(dataPCA, histoQueryPCA, k=3)
+    resBruteRadiusACP = dist.radius_search(dataPCA, histoQueryPCA, r=1)
+
+    # Pour tous les résultats retournés par la recherche en ACP
+    match = 0
+    for i in range(len(resBruteRadiusACP[0])):
+
+        # On vérifie s'ils correspondent dans la liste des réponses justes
+        for j in range(len(resBruteRadiusL2[0])):
+            if resBruteRadiusACP[0][i] == resBruteRadiusL2[0][j]:
+                match += 1
+
+    precision[count] = match/len(resBruteRadiusACP[0])
+    stop = timeit.default_timer()
+    time[count] = stop-start
+    count += 1
+
+plt.plot(dimValues, precision)
+plt.xlabel('Dimension')
+plt.ylabel('Precision')
+plt.title('ACP radius search')
+plt.grid()
+plt.show()
+
+plt.plot(dimValues, time)
+plt.xlabel('Dimension')
+plt.ylabel('Time (ms)')
+plt.title('ACP Radius search')
+plt.grid()
+plt.show()
+
+
+# PCA unique
+dimensionArivee = 480
 pca = PCA(n_components=dimensionArivee)
 dataPCA = pca.fit_transform(allDataHisto)
 
@@ -204,21 +257,21 @@ histoQueryPCA = histoQuery - pca.mean_
 VecteurP = pca.components_
 histoQueryPCA = histoQueryPCA@VecteurP.T
 
-resBruteKnnL2 = dist.knn_search(dataPCA, histoQueryPCA, k=3)
-resBruteRadiusL2 = dist.radius_search(dataPCA, histoQueryPCA, r=1)
-
+resBruteKnnACP = dist.knn_search(dataPCA, histoQueryPCA, k=3)
+resBruteRadiusACP = dist.radius_search(dataPCA, histoQueryPCA, r=1)
+print()
 print("Image requete : "+str(queryPath))
 
-print("Brute force knn L2")
-
-for i in range(len(resBruteKnnL2[0])):
+print("Recherche knn ACP n dimensions : "+str(dimensionArivee))
+for i in range(len(resBruteKnnACP[0])):
 
     print("- Resultat "+str(i)+" : " +
-          str(database[resBruteKnnL2[0][i]])+" distance : "+str(resBruteKnnL2[1][i]))
+          str(database[resBruteKnnACP[0][i]])+" distance : "+str(resBruteKnnACP[1][i]))
+
 
 print("")
-print("Brute force radius L2")
-for i in range(len(resBruteRadiusL2[0])):
+print("Recherche radius L2 ACP")
+for i in range(len(resBruteRadiusACP[0])):
 
     print("- Resultat "+str(i)+" : " +
-          str(database[resBruteRadiusL2[0][i]])+" distance : "+str(resBruteRadiusL2[1][i]))
+          str(database[resBruteRadiusACP[0][i]])+" distance : "+str(resBruteRadiusACP[1][i]))
