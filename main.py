@@ -4,6 +4,7 @@ import cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt
 import distance as dist
+import lsh as LSH
 
 debug = True
 debugPlus = False
@@ -172,3 +173,20 @@ for i in range(len(resBruteRadiusL2[0])):
 
     print("- Resultat "+str(i)+" : " +
           str(database[resBruteRadiusL2[0][i]])+" distance : "+str(resBruteRadiusL2[1][i]))
+
+w = 1
+nbProjections = 2
+nbTabHash = 1
+
+print("")
+print("Recherche LSH : W = "+str(w)+" nb projections : "+str(nbProjections))
+
+lsh = LSH.LSH(nb_projections=nbProjections, nb_tables=nbTabHash, w=w)
+lsh.fit(allDataHisto)
+
+lshRes = lsh.kneighbors(histoQuery, k=3)
+
+for i in range(len(lshRes[0])):
+
+    print("- Resultat "+str(i)+" : " +
+          str(database[lshRes[1][i]])+" distance : "+str(lshRes[0][i]))
