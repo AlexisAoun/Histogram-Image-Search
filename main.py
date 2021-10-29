@@ -13,7 +13,7 @@ debug = False
 debugPlus = False
 
 queryPath = "./data/small/queries/2090339522_d30d2436f9.jpg"
-databasePath = "./data/big/images"
+databasePath = "./data/small/images"
 numpyPath = Path("./save.npy")
 
 database = []
@@ -178,7 +178,7 @@ for i in range(len(resBruteRadiusL2[0])):
     print("- Resultat "+str(i)+" : " +
           str(database[resBruteRadiusL2[0][i]])+" distance : "+str(resBruteRadiusL2[1][i]))
 
-
+'''
 # LSH
 w = 1
 nbProjections = 12
@@ -196,11 +196,11 @@ for i in range(len(lshRes[0])):
 
     print("- Resultat "+str(i)+" : " +
           str(database[lshRes[1][i]])+" distance : "+str(lshRes[0][i]))
-
+'''
 
 # ACP, mesure de la précision et du temps d'execution
 dimMax = 150
-dimMin = 140
+dimMin = 120
 dimValues = [i for i in range(dimMin, dimMax+1)]
 precision = np.zeros_like(dimValues, dtype=np.float32)
 time = np.zeros_like(dimValues, dtype=np.float32)
