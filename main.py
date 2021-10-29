@@ -1,13 +1,17 @@
+from sklearn.decomposition import PCA
+import lsh as LSH
 import os
 from pathlib import Path
 import cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt
 import distance as dist
-import lsh as LSH
+
 
 debug = True
 debugPlus = False
+
+dimensionArivee = 256
 
 queryPath = "./data/small/queries/2090339522_d30d2436f9.jpg"
 databasePath = "./data/small/images"
@@ -53,13 +57,13 @@ def getImage(path, debug):
     except ValueError:
 
         print("[DEBUG] Echec du chargement de l'image")
-        print("[DEBUG] Sorti du programme...")
+        print("[DEBUG] Sortie du programme...")
         exit()
 
     if debug and img is None:
 
         print("[DEBUG] Echec du chargement de l'image")
-        print("[DEBUG] Sorti du programme...")
+        print("[DEBUG] Sortie du programme...")
         exit()
 
     elif debug and img.all() != None:
@@ -84,7 +88,7 @@ if numpyPath.is_file():
 
     if debug and allDataHisto is not None:
 
-        print("[DEBUG] Sauvegarde numpy chargé avec succes")
+        print("[DEBUG] Sauvegarde numpy chargee avec succes")
 
     elif debug:
 
@@ -118,11 +122,11 @@ else:
 
     if debug and numpyPath.is_file():
 
-        print("[DEBUG] Sauvegarde numpy termine")
+        print("[DEBUG] Sauvegarde numpy terminee")
 
     elif debug:
 
-        print("[DEBUG] [WARING] Echec de la sauvegarde numpy")
+        print("[DEBUG] [WARNING] Echec de la sauvegarde numpy")
 
 # Traitement image requete --------------------------------------------------------------------------------
 
@@ -134,7 +138,7 @@ queryImg = getImage(str(queryPath), debug)
 
 if debug:
 
-    print("[DEBUG] Calcule du vecteur carateristique de la requete...")
+    print("[DEBUG] Calcul du vecteur carateristique de la requete...")
 
 histoQuery = computeHistoVector(queryImg)
 
@@ -147,13 +151,14 @@ if debug:
     else:
 
         print("[DEBUG] Echec du calcul du vecteur caracteristique de la requete")
-        print("[DEBUG] Sorti du programme...")
+        print("[DEBUG] Sortie du programme...")
         exit()
 
 # Recherche ---------------------------------------------------------------------------------------------
 
+# Brute force : meilleurs resultats possibles
 if debug:
-    print("[DEBUG] Calcule Brute knn et radius L2")
+    print("[DEBUG] Calcul Brute knn et radius L2")
 
 resBruteKnnL2 = dist.knn_search(allDataHisto, histoQuery, k=3)
 resBruteRadiusL2 = dist.radius_search(allDataHisto, histoQuery, r=1)
@@ -190,3 +195,30 @@ for i in range(len(lshRes[0])):
 
     print("- Resultat "+str(i)+" : " +
           str(database[lshRes[1][i]])+" distance : "+str(lshRes[0][i]))
+# ACP
+
+pca = PCA(n_components=dimensionArivee)
+dataPCA = pca.fit_transform(allDataHisto)
+
+histoQueryPCA = histoQuery - pca.mean_
+VecteurP = pca.components_
+histoQueryPCA = histoQueryPCA@VecteurP.T
+
+resBruteKnnL2 = dist.knn_search(dataPCA, histoQueryPCA, k=3)
+resBruteRadiusL2 = dist.radius_search(dataPCA, histoQueryPCA, r=1)
+
+print("Image requete : "+str(queryPath))
+
+print("Brute force knn L2")
+
+for i in range(len(resBruteKnnL2[0])):
+
+    print("- Resultat "+str(i)+" : " +
+          str(database[resBruteKnnL2[0][i]])+" distance : "+str(resBruteKnnL2[1][i]))
+
+print("")
+print("Brute force radius L2")
+for i in range(len(resBruteRadiusL2[0])):
+
+    print("- Resultat "+str(i)+" : " +
+          str(database[resBruteRadiusL2[0][i]])+" distance : "+str(resBruteRadiusL2[1][i]))
