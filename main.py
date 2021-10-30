@@ -12,9 +12,9 @@ import timeit
 debug = False
 debugPlus = False
 
-queryPath = "./data/small/queries/2090339522_d30d2436f9.jpg"
-databasePath = "./data/small/images"
-numpyPath = Path("./save.npy")
+queryPath = "./data/small/queries/3613323772_d15cef66d1.jpg"
+databasePath = "./data/big/images"
+numpyPath = Path("./savebig.npy")
 
 database = []
 i = 0
@@ -198,15 +198,17 @@ for i in range(len(lshRes[0])):
           str(database[lshRes[1][i]])+" distance : "+str(lshRes[0][i]))
 '''
 
-# ACP, mesure de la précision et du temps d'execution
+
+# ACP, mesure de la précision et du temps d'execution ------------------------------------------------
 dimMax = 150
-dimMin = 120
+dimMin = 50
 dimValues = [i for i in range(dimMin, dimMax+1)]
 precision = np.zeros_like(dimValues, dtype=np.float32)
 time = np.zeros_like(dimValues, dtype=np.float32)
 
 count = 0
 start = timeit.default_timer()
+# Pour chaque dimensions allant de dimMin a dimMax
 for dimensionArivee in range(dimMin, dimMax+1):
 
     pca = PCA(n_components=dimensionArivee)
@@ -236,20 +238,20 @@ for dimensionArivee in range(dimMin, dimMax+1):
 plt.plot(dimValues, precision)
 plt.xlabel('Dimension')
 plt.ylabel('Precision')
-plt.title('ACP radius search')
+plt.title('ACP radius search '+str(databasePath)+str(queryPath))
 plt.grid()
 plt.show()
 
 plt.plot(dimValues, time)
 plt.xlabel('Dimension')
-plt.ylabel('Time (ms)')
+plt.ylabel('Time (s)')
 plt.title('ACP Radius search')
 plt.grid()
 plt.show()
 
 
-# PCA unique
-dimensionArivee = 480
+# PCA unique --------------------------------------------------------------------------
+dimensionArivee = 100
 pca = PCA(n_components=dimensionArivee)
 dataPCA = pca.fit_transform(allDataHisto)
 
