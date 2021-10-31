@@ -2,7 +2,7 @@ import numpy as np
 from numpy.lib.function_base import quantile
 
 
-def compute_distances(data, query, dist="L2"):
+def compute_distances(data, query, dist):
     """ Compute distances.
     Computes the distances between the vectors (rows) of a dataset and a
     single query). Three distances are supported:
@@ -18,9 +18,9 @@ def compute_distances(data, query, dist="L2"):
     elif dist == "inf":
         distances = np.max(np.abs(data - query), axis=1)
     elif dist == "inter":
-        distances = np.sum(np.minimum(data, query), axis=0)
+        distances = np.sum(np.minimum(data, query), axis=1)
     elif dist == "chi2":
-        distances = np.sum((data-query)**2 / (data+query), axis=0)
+        distances = np.sum((data-query)**2 / (data+query), axis=1)
     return distances
 
 

@@ -1,17 +1,20 @@
+from sklearn.decomposition import PCA
+import lsh as LSH
 import os
 from pathlib import Path
 import cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt
 import distance as dist
-import lsh as LSH
+import timeit
 
-debug = True
+
+debug = False
 debugPlus = False
 
-queryPath = "./data/small/queries/2090339522_d30d2436f9.jpg"
-databasePath = "./data/small/images"
-numpyPath = Path("./save.npy")
+queryPath = "./data/small/queries/3613323772_d15cef66d1.jpg"
+databasePath = "./data/big/images"
+numpyPath = Path("./savebig.npy")
 
 database = []
 i = 0
@@ -53,13 +56,13 @@ def getImage(path, debug):
     except ValueError:
 
         print("[DEBUG] Echec du chargement de l'image")
-        print("[DEBUG] Sorti du programme...")
+        print("[DEBUG] Sortie du programme...")
         exit()
 
     if debug and img is None:
 
         print("[DEBUG] Echec du chargement de l'image")
-        print("[DEBUG] Sorti du programme...")
+        print("[DEBUG] Sortie du programme...")
         exit()
 
     elif debug and img.all() != None:
@@ -84,7 +87,7 @@ if numpyPath.is_file():
 
     if debug and allDataHisto is not None:
 
-        print("[DEBUG] Sauvegarde numpy chargé avec succes")
+        print("[DEBUG] Sauvegarde numpy chargee avec succes")
 
     elif debug:
 
@@ -118,11 +121,11 @@ else:
 
     if debug and numpyPath.is_file():
 
-        print("[DEBUG] Sauvegarde numpy termine")
+        print("[DEBUG] Sauvegarde numpy terminee")
 
     elif debug:
 
-        print("[DEBUG] [WARING] Echec de la sauvegarde numpy")
+        print("[DEBUG] [WARNING] Echec de la sauvegarde numpy")
 
 # Traitement image requete --------------------------------------------------------------------------------
 
@@ -134,7 +137,7 @@ queryImg = getImage(str(queryPath), debug)
 
 if debug:
 
-    print("[DEBUG] Calcule du vecteur carateristique de la requete...")
+    print("[DEBUG] Calcul du vecteur carateristique de la requete...")
 
 histoQuery = computeHistoVector(queryImg)
 
@@ -147,13 +150,14 @@ if debug:
     else:
 
         print("[DEBUG] Echec du calcul du vecteur caracteristique de la requete")
-        print("[DEBUG] Sorti du programme...")
+        print("[DEBUG] Sortie du programme...")
         exit()
 
 # Recherche ---------------------------------------------------------------------------------------------
 
+# Brute force : meilleurs resultats possibles
 if debug:
-    print("[DEBUG] Calcule Brute knn et radius L2")
+    print("[DEBUG] Calcul Brute knn et radius L2")
 
 resBruteKnnL2 = dist.knn_search(allDataHisto, histoQuery, k=3)
 resBruteRadiusL2 = dist.radius_search(allDataHisto, histoQuery, r=1)
@@ -174,8 +178,10 @@ for i in range(len(resBruteRadiusL2[0])):
     print("- Resultat "+str(i)+" : " +
           str(database[resBruteRadiusL2[0][i]])+" distance : "+str(resBruteRadiusL2[1][i]))
 
+'''
+# LSH
 w = 1
-nbProjections = 2
+nbProjections = 12
 nbTabHash = 1
 
 print("")
@@ -190,3 +196,84 @@ for i in range(len(lshRes[0])):
 
     print("- Resultat "+str(i)+" : " +
           str(database[lshRes[1][i]])+" distance : "+str(lshRes[0][i]))
+'''
+
+
+# ACP, mesure de la précision et du temps d'execution ------------------------------------------------
+dimMax = 150
+dimMin = 50
+dimValues = [i for i in range(dimMin, dimMax+1)]
+precision = np.zeros_like(dimValues, dtype=np.float32)
+time = np.zeros_like(dimValues, dtype=np.float32)
+
+count = 0
+start = timeit.default_timer()
+# Pour chaque dimensions allant de dimMin a dimMax
+for dimensionArivee in range(dimMin, dimMax+1):
+
+    pca = PCA(n_components=dimensionArivee)
+    dataPCA = pca.fit_transform(allDataHisto)
+
+    histoQueryPCA = histoQuery - pca.mean_
+    VecteurP = pca.components_
+    histoQueryPCA = histoQueryPCA@VecteurP.T
+
+    resBruteKnnACP = dist.knn_search(dataPCA, histoQueryPCA, k=3)
+    resBruteRadiusACP = dist.radius_search(dataPCA, histoQueryPCA, r=1)
+
+    # Pour tous les résultats retournés par la recherche en ACP
+    match = 0
+    for i in range(len(resBruteRadiusACP[0])):
+
+        # On vérifie s'ils correspondent dans la liste des réponses justes
+        for j in range(len(resBruteRadiusL2[0])):
+            if resBruteRadiusACP[0][i] == resBruteRadiusL2[0][j]:
+                match += 1
+
+    precision[count] = match/len(resBruteRadiusACP[0])
+    stop = timeit.default_timer()
+    time[count] = stop-start
+    count += 1
+
+plt.plot(dimValues, precision)
+plt.xlabel('Dimension')
+plt.ylabel('Precision')
+plt.title('ACP radius search '+str(databasePath)+str(queryPath))
+plt.grid()
+plt.show()
+
+plt.plot(dimValues, time)
+plt.xlabel('Dimension')
+plt.ylabel('Time (s)')
+plt.title('ACP Radius search')
+plt.grid()
+plt.show()
+
+
+# PCA unique --------------------------------------------------------------------------
+dimensionArivee = 100
+pca = PCA(n_components=dimensionArivee)
+dataPCA = pca.fit_transform(allDataHisto)
+
+histoQueryPCA = histoQuery - pca.mean_
+VecteurP = pca.components_
+histoQueryPCA = histoQueryPCA@VecteurP.T
+
+resBruteKnnACP = dist.knn_search(dataPCA, histoQueryPCA, k=3)
+resBruteRadiusACP = dist.radius_search(dataPCA, histoQueryPCA, r=1)
+print()
+print("Image requete : "+str(queryPath))
+
+print("Recherche knn ACP n dimensions : "+str(dimensionArivee))
+for i in range(len(resBruteKnnACP[0])):
+
+    print("- Resultat "+str(i)+" : " +
+          str(database[resBruteKnnACP[0][i]])+" distance : "+str(resBruteKnnACP[1][i]))
+
+
+print("")
+print("Recherche radius L2 ACP")
+for i in range(len(resBruteRadiusACP[0])):
+
+    print("- Resultat "+str(i)+" : " +
+          str(database[resBruteRadiusACP[0][i]])+" distance : "+str(resBruteRadiusACP[1][i]))
