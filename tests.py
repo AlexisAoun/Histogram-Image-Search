@@ -7,6 +7,33 @@ import numpy as np
 from matplotlib import pyplot as plt
 import distance as dist
 import timeit
+import utils as utils
+
+testQueryFolderPath = "./data/small/queries"
+testQueryDatabase = []
+testQuerySize = 0
+
+def buildQueryData():
+
+    i = 0
+    for entry in os.scandir(testQueryFolderPath):
+
+        if (entry.path.endswith(".jpg") or entry.path.endswith(".png")) and entry.is_file():
+
+            testQueryDatabase.append(str(entry.path))
+            i += 1
+
+    testQuerySize = i
+    testQueryData = np.ndarray(shape=(testQuerySize, 768))
+    i = 0
+
+    for path in testQueryDatabase :
+
+        print(str(path))
+        testQueryData[i] = utils.computeHistoVector(utils.getImage(path, False))
+        i+=1
+    
+    return testQueryData
 
 
 def testAcp(allDataHisto, histoQuery, databasePath, queryPath):
@@ -63,3 +90,92 @@ def testAcp(allDataHisto, histoQuery, databasePath, queryPath):
     plt.title('ACP Radius search')
     plt.grid()
     plt.show()
+
+def testLsh (data) :
+    queryData = buildQueryData()
+    # Influence du facteur W
+    #TODO compute true value with already coded brute algorithm
+
+    max = 3
+    w_values = [0.25 * i for i in range(1, max)]
+    precisions = []
+    inspected_avgs = []
+    for w in w_values:
+        print("Valeur de W:%f" % w)
+        lsh = LSH.LSH(nb_projections=10, nb_tables=2, w=w)
+        lsh.fit(data)
+        match_count = 0
+        inspected_count = 0
+        for i, query in enumerate(queryData):
+            lsh_result = lsh.kneighbors(query, k=1)
+            lsh_index = lsh_result[1][0]
+            match_count += 1 if lsh_index == ground_indices[i] else 0
+            inspected_count += lsh_result[2]
+
+        precision = match_count / len(queryData) #same as dataQuerySize ??
+        precisions.append(precision)
+        print("precision: %f" % precision)
+
+        inspected_avg = inspected_count / len(pr_glove)
+        inspected_avgs.append(inspected_avg)
+        print("inspected data: %f" % inspected_avg)
+
+    # courbe de la précision en fonction de W
+    plt.plot(w_values, precisions, label="W", color="blue")
+    plt.legend()
+    plt.show()
+
+    # courbe du nombre de données inspectés en moyenne en fonction de W
+    plt.plot(w_values, inspected_avg, label="W", color="blue")
+    plt.legend()
+    plt.show()
+
+    # Influence du nombre de table de hachage
+    precisions = []
+    ratio_avgs = []
+    data_size = len(data)
+    for nt in range(1,7):
+        print("Nombre de tables:%d" % nt)
+        lsh = LSH.LSH(nb_projections=10, nb_tables=nt, w=1.0)
+        lsh.fit(data)
+        match_count = 0
+        inspected_count = 0
+        ratio_sum = 0
+        for i, query in enumerate(queryData):
+            lsh_result = lsh.kneighbors(query, k=1)
+            lsh_index = lsh_result[1][0]
+            match_count += 1 if lsh_index == ground_indices[i] else 0
+            inspected_count += lsh_result[2]
+            ratio = inspected_count / data_size
+            ratio_sum += ratio
+
+        precision = match_count / len(queryData) #same question
+        precisions.append(precision)
+        print("precision: %f" % precision)
+
+        ratio_avg = ratio_sum / len(queryData)
+        ratio_avgs.append(ratio_avg)
+        print("average ratio : %f" % ratio_avg)
+
+    # Comportement en fonction de la la dimension de la donnée
+    max_dim = data.shape[1]
+    for dim in range(10, max_dim, 20):
+        print("Dimension:%d" % dim)
+        red_ds_glove = data[:, :dim]
+        red_pr_glove = queryData[:, :dim]
+        bf = NearestNeighbors(n_neighbors=1, algorithm='brute')
+        bf.fit(red_ds_glove)
+        ground_results = bf.kneighbors(red_pr_glove, n_neighbors=1)
+        ground_indices = ground_results[1]
+        for nproj in [5, 8, 10]:
+            print("Nombre de projection:%d" % nproj)
+            lsh = LSH(nb_projections=nproj, nb_tables=2, w=1.0)
+            lsh.fit(red_ds_glove)
+            match_count = 0
+            for i, query in enumerate(red_pr_glove):
+                lsh_result = lsh.kneighbors(query, k=1)
+                lsh_index = lsh_result[1][0]
+                match_count += 1 if lsh_index == ground_indices[i] else 0
+
+            precision = match_count / len(red_pr_glove)
+            print("precision: %f" % precision)

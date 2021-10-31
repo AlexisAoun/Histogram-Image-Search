@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 import distance as dist
 import timeit
 import tests as tests
+import utils as utils
 
 
 debug = True
@@ -27,50 +28,6 @@ for entry in os.scandir(databasePath):
         i += 1
 
 databaseSize = i
-
-
-def computeHistoVector(inputImage):
-
-    rHisto = cv.calcHist([inputImage], [0], None, [256], [0, 256])
-    gHisto = cv.calcHist([inputImage], [1], None, [256], [0, 256])
-    bHisto = cv.calcHist([inputImage], [2], None, [256], [0, 256])
-
-    rHisto = rHisto.flatten()
-    gHisto = gHisto.flatten()
-    bHisto = bHisto.flatten()
-
-    rHisto = cv.normalize(rHisto, rHisto)
-    gHisto = cv.normalize(gHisto, gHisto)
-    bHisto = cv.normalize(bHisto, bHisto)
-
-    histo = np.concatenate((rHisto, gHisto, bHisto))
-
-    return histo
-
-
-def getImage(path, debug):
-
-    try:
-
-        img = cv.imread(path, cv.IMREAD_COLOR)
-
-    except ValueError:
-
-        print("[DEBUG] Echec du chargement de l'image")
-        print("[DEBUG] Sortie du programme...")
-        exit()
-
-    if debug and img is None:
-
-        print("[DEBUG] Echec du chargement de l'image")
-        print("[DEBUG] Sortie du programme...")
-        exit()
-
-    elif debug and img.all() != None:
-
-        print("[DEBUG] Image chargee avec succes")
-
-    return img
 
 # Traitement image base de donnée -------------------------------------------------------------------------
 
@@ -110,7 +67,7 @@ else:
 
             print("[DEBUG] Path actuel : "+path)
 
-        allDataHisto[i] = computeHistoVector(getImage((path), debugPlus))
+        allDataHisto[i] = utils.computeHistoVector(utils.getImage((path), debugPlus))
         i += 1
 
     if debug:
@@ -134,13 +91,13 @@ if debug:
 
     print("[DEBUG] Chargement de l'image requete...")
 
-queryImg = getImage(str(queryPath), debug)
+queryImg = utils.getImage(str(queryPath), debug)
 
 if debug:
 
     print("[DEBUG] Calcul du vecteur carateristique de la requete...")
 
-histoQuery = computeHistoVector(queryImg)
+histoQuery = utils.computeHistoVector(queryImg)
 
 if debug:
 
@@ -233,5 +190,8 @@ for i in range(len(resBruteRadiusACP[0])):
           str(database[resBruteRadiusACP[0][i]])+" distance : "+str(resBruteRadiusACP[1][i]))
 
 '''
-print("[DEBUG] Test acp en cours...")
-tests.testAcp(allDataHisto, histoQuery, databasePath, queryPath)
+#print("[DEBUG] Test acp en cours...")
+#tests.testAcp(allDataHisto, histoQuery, databasePath, queryPath)
+
+print("[DEBUG] Test lsh en cours...")
+tests.testLsh(allDataHisto)
