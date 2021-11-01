@@ -95,111 +95,118 @@ def testAcp(allDataHisto, histoQuery, databasePath, queryPath):
     plt.grid()
     plt.show()
 
-def testLsh (data) :
-    queryData = buildQueryData()
-
-    bf = NearestNeighbors(n_neighbors=1, algorithm="brute")
-    bf.fit(data)
-    ground_results = bf.kneighbors(queryData, n_neighbors=1)
-    ground_indices = ground_results[1]
-
-    # Influence du facteur W
-
-    max = 11
-    w_values = [0.05 * i for i in range(1, max)]
+def testLsh (data, queryData, w, nbTab, nbProj, k):
     precisions = []
-    inspected_avgs = []
+    insptected_avg = []
+
+    lsh = LSH.LSH(nb_projections=nbProj, nb_tables=nbTab, w=w)
+    lsh.fit(data)
+
+    match_count = 0
+    inspected_count = 0
+    ratioSum = 0
+    ratioAvg = 0
+
+    for query in queryData :
+
+        valeurTerrain = dist.knn_search(data, query, k=k)
+        valeurTerrainIndex = valeurTerrain[0]
+        
+        lshResult = lsh.kneighbors(query, k=k)
+        lshIndex = lshResult[1]
+
+        inspected_count += lshResult[2]
+        ratioSum += (inspected_count / len(data))
+
+        for i in range(len(lshIndex)):
+            for j in range(len(valeurTerrainIndex)):
+                if lshIndex[i] == valeurTerrainIndex[j]:
+                    match_count+=1
+
+    precision = match_count / (len(queryData)*k)
+    ratioAvg = ratioSum / len(queryData)
+
+    return precision, ratioAvg
+
+
+def testCompletLsh (data) :
+    queryData = buildQueryData()
+    '''
+    print("Test de l'influence de W")
+    # Influence du facteur W -------------------------------------------------------------------------------------
+    max = 20
+    w_values = [0.025 * i for i in range(0, max)]
+    w_values[0] = 0.001
+    precisions = []
+    ratioAvgs = []
 
     for w in w_values:
 
         print("Valeur de W:%f" % w)
-        lsh = LSH.LSH(nb_projections=20, nb_tables=8, w=w)
-        lsh.fit(data)
-        match_count = 0
-        inspected_count = 0
+        res = testLsh(data, queryData, w, 5, 8, 5)  
 
-        for query in queryData:
+        precisions.append(res[0])
+        print("precision: %f" % res[0])
 
-            valeurTerrain = dist.knn_search(data, query, k=5)
-            lsh_result = lsh.kneighbors(query, k=5)
-
-            lsh_index = lsh_result[1]
-            inspected_count += lsh_result[2]
-
-            valeurTerrainIndex = valeurTerrain[0]
-
-            for i in range(5):
-                for j in range(5):
-                    if lsh_index[i] == valeurTerrainIndex[j]:
-                        match_count+=1
-            
-
-        precision = match_count / (len(queryData)*5)
-        precisions.append(precision)
-        print("precision: %f" % precision)
-
-        inspected_avg = inspected_count / len(queryData)
-        inspected_avgs.append(inspected_avg)
-        print("inspected data: %f" % inspected_avg)
+        ratioAvgs.append(res[1])
+        print("ratio data: %f" % res[1])
 
     # courbe de la précision en fonction de W
-    plt.plot(w_values, precisions, label="W", color="blue")
+    plt.plot(w_values, precisions, label="Infleunce W sur precision", color="blue")
     plt.legend()
     plt.show()
 
     # courbe du nombre de données inspectés en moyenne en fonction de W
-    plt.plot(w_values, inspected_avgs, label="W", color="blue")
+    plt.plot(w_values, ratioAvgs, label="Influence W sur nbre d'elements inspectes", color="blue")
     plt.legend()
     plt.show()
-'''
-    # Influence du nombre de table de hachage
+
+
+    # Influence du nombre de table de hachage -------------------------------------------------------------------
+    print("Test de l'influence du nombre de table de hachage")
     precisions = []
-    ratio_avgs = []
-    data_size = len(data)
-    for nt in range(1,7):
+    ratioAvgs = []
+    for nt in range(1,11):
         print("Nombre de tables:%d" % nt)
-        lsh = LSH.LSH(nb_projections=10, nb_tables=nt, w=1.0)
-        lsh.fit(data)
-        match_count = 0
-        inspected_count = 0
-        ratio_sum = 0
-        for i, query in enumerate(queryData):
-            lsh_result = lsh.kneighbors(query, k=1)
-            lsh_index = lsh_result[1][0]
-            match_count += 1 if lsh_index == ground_indices[i] else 0
-            inspected_count += lsh_result[2]
-            ratio = inspected_count / data_size
-            ratio_sum += ratio
+        res = testLsh(data, queryData, 0.065 , nt, 8, 5)
 
-        precision = match_count / len(queryData) #same question
-        precisions.append(precision)
-        print("precision: %f" % precision)
+        precisions.append(res[0])
+        print("precision: %f" % res[0])
 
-        ratio_avg = ratio_sum / len(queryData)
-        ratio_avgs.append(ratio_avg)
-        print("average ratio : %f" % ratio_avg)
+        ratioAvgs.append(res[1])
+        print("ratio data : %f" % res[1])
 
-    # Comportement en fonction de la la dimension de la donnée
-    max_dim = data.shape[1]
-    for dim in range(10, max_dim, 20):
-        print("Dimension:%d" % dim)
-        red_ds_glove = data[:, :dim]
-        red_pr_glove = queryData[:, :dim]
-        bf = NearestNeighbors(n_neighbors=1, algorithm='brute')
-        bf.fit(red_ds_glove)
-        ground_results = bf.kneighbors(red_pr_glove, n_neighbors=1)
-        ground_indices = ground_results[1]
-        for nproj in [5, 8, 10]:
-            print("Nombre de projection:%d" % nproj)
-            lsh = LSH(nb_projections=nproj, nb_tables=2, w=1.0)
-            lsh.fit(red_ds_glove)
-            match_count = 0
-            for i, query in enumerate(red_pr_glove):
-                lsh_result = lsh.kneighbors(query, k=1)
-                lsh_index = lsh_result[1][0]
-                match_count += 1 if lsh_index == ground_indices[i] else 0
+    plt.plot(range(1,11), precisions, label="Influence nb tab sur precision", color="blue")
+    plt.legend()
+    plt.show()
 
-            precision = match_count / len(red_pr_glove)
-            print("precision: %f" % precision)
+    plt.plot(range(1,11), ratioAvgs, label="Influence nb tab sur inspected avgs", color="blue")
+    plt.legend()
+    plt.show()
 
-'''
+
+    '''
+
+    # Comportement en fonction du nbre de projection ------------------------------------------------------------
+    print("Test de l'influence du nombre de projection")
+    ratioAvgs = []
+    precisions = []
+    for nproj in range(1, 20):
+        print("Nombre de projection:%d" % nproj)
+
+        res = testLsh(data, queryData, 0.065, 3, nproj, 5)
+
+        precisions.append(res[0])
+        print("precision: %f" % res[0])
+
+        ratioAvgs.append(res[1])
+        print("Ratio data : %f" % res[1])
+
+    plt.plot(range(1,20), precisions, label="Influence nb proj sur precision", color="blue")
+    plt.legend()
+    plt.show()
+
+    plt.plot(range(1,20), ratioAvgs, label="Influence nb proj sur inspected avgs", color="blue")
+    plt.legend()
+    plt.show()
+

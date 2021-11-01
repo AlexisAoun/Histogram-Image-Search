@@ -113,85 +113,12 @@ if debug:
 
 # Recherche ---------------------------------------------------------------------------------------------
 
-# Brute force : meilleurs resultats possibles
-'''
-if debug:
-    print("[DEBUG] Calcul Brute knn et radius L2")
+#w = 0.065
+#nbTab = 3
+#nbProj = 6
+#
+#print("test lsh w = %f , nb tab = %f , nb proj = %f" %(w, nbTab,nbProj ))
+#res = tests.testLsh(allDataHisto,tests.buildQueryData(), w, nbTab, nbProj, 5)
+#print(res)
 
-resBruteKnnL2 = dist.knn_search(allDataHisto, histoQuery, k=3)
-resBruteRadiusL2 = dist.radius_search(allDataHisto, histoQuery, r=0.7)
-
-print("Image requete : "+str(queryPath))
-
-print("Brute force knn L2")
-
-for i in range(len(resBruteKnnL2[0])):
-
-    print("- Resultat "+str(i)+" : " +
-          str(database[resBruteKnnL2[0][i]])+" distance : "+str(resBruteKnnL2[1][i]))
-
-print("")
-print("Brute force radius L2")
-for i in range(len(resBruteRadiusL2[0])):
-
-    print("- Resultat "+str(i)+" : " +
-          str(database[resBruteRadiusL2[0][i]])+" distance : "+str(resBruteRadiusL2[1][i]))
-
-# LSH
-w = 1
-nbProjections = 12
-nbTabHash = 1
-
-print("")
-print("Recherche LSH : W = "+str(w)+" nb projections : "+str(nbProjections))
-
-lsh = LSH.LSH(nb_projections=nbProjections, nb_tables=nbTabHash, w=w)
-lsh.fit(allDataHisto)
-
-lshRes = lsh.kneighbors(histoQuery, k=3)
-
-for i in range(len(lshRes[0])):
-
-    print("- Resultat "+str(i)+" : " +
-          str(database[lshRes[1][i]])+" distance : "+str(lshRes[0][i]))
-
-
-'''
-
-# ACP, mesure de la précision et du temps d'execution ------------------------------------------------
-
-# PCA unique --------------------------------------------------------------------------
-'''
-dimensionArivee = 100
-pca = PCA(n_components=dimensionArivee)
-dataPCA = pca.fit_transform(allDataHisto)
-
-histoQueryPCA = histoQuery - pca.mean_
-VecteurP = pca.components_
-histoQueryPCA = histoQueryPCA@VecteurP.T
-
-resBruteKnnACP = dist.knn_search(dataPCA, histoQueryPCA, k=3)
-resBruteRadiusACP = dist.radius_search(dataPCA, histoQueryPCA, r=0.7)
-print()
-print("Image requete : "+str(queryPath))
-
-print("Recherche knn ACP n dimensions : "+str(dimensionArivee))
-for i in range(len(resBruteKnnACP[0])):
-
-    print("- Resultat "+str(i)+" : " +
-          str(database[resBruteKnnACP[0][i]])+" distance : "+str(resBruteKnnACP[1][i]))
-
-
-print("")
-print("Recherche radius L2 ACP")
-for i in range(len(resBruteRadiusACP[0])):
-
-    print("- Resultat "+str(i)+" : " +
-          str(database[resBruteRadiusACP[0][i]])+" distance : "+str(resBruteRadiusACP[1][i]))
-
-'''
-#print("[DEBUG] Test acp en cours...")
-#tests.testAcp(allDataHisto, histoQuery, databasePath, queryPath)
-
-print("[DEBUG] Test lsh en cours...")
-tests.testLsh(allDataHisto)
+tests.testCompletLsh(allDataHisto)
