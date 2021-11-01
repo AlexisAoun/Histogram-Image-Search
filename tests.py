@@ -15,8 +15,8 @@ testQueryDatabase = []
 testQuerySize = 0
 
 
-#fonction construisant le tableau de vecteurs des images dans le dossier query specifier dans testQueryFolderPath
-def buildQueryData(debug = False):
+# fonction construisant le tableau de vecteurs des images dans le dossier query specifier dans testQueryFolderPath
+def buildQueryData(debug=False):
 
     i = 0
     for entry in os.scandir(testQueryFolderPath):
@@ -30,19 +30,20 @@ def buildQueryData(debug = False):
     testQueryData = np.ndarray(shape=(testQuerySize, 768))
     i = 0
 
-    for path in testQueryDatabase :
+    for path in testQueryDatabase:
 
-        if debug :
+        if debug:
 
             print("[DEBUG] "+str(path))
 
-        testQueryData[i] = utils.computeHistoVector(utils.getImage(path, False))
-        i+=1
-    
+        testQueryData[i] = utils.computeHistoVector(
+            utils.getImage(path, False))
+        i += 1
+
     return testQueryData
 
 
-#fonction de test acp
+# fonction de test acp
 def testAcp(allDataHisto, histoQuery, databasePath, queryPath):
 
     dimMax = 150
@@ -99,9 +100,9 @@ def testAcp(allDataHisto, histoQuery, databasePath, queryPath):
     plt.show()
 
 
-#fonction testant un tableau de vecteur query avec les param LSH specifier
-#retourne la precision et le ration de vecteur inspecte
-def testLsh (data, queryData, w, nbTab, nbProj, k):
+# fonction testant un tableau de vecteur query avec les param LSH specifier
+# retourne la precision et le ration de vecteur inspecte
+def testLsh(data, queryData, w, nbTab, nbProj, k):
     precisions = []
     insptected_avg = []
 
@@ -113,11 +114,11 @@ def testLsh (data, queryData, w, nbTab, nbProj, k):
     ratioSum = 0
     ratioAvg = 0
 
-    for query in queryData :
+    for query in queryData:
 
         valeurTerrain = dist.knn_search(data, query, k=k)
         valeurTerrainIndex = valeurTerrain[0]
-        
+
         lshResult = lsh.kneighbors(query, k=k)
         lshIndex = lshResult[1]
 
@@ -127,7 +128,7 @@ def testLsh (data, queryData, w, nbTab, nbProj, k):
         for i in range(len(lshIndex)):
             for j in range(len(valeurTerrainIndex)):
                 if lshIndex[i] == valeurTerrainIndex[j]:
-                    match_count+=1
+                    match_count += 1
 
     precision = match_count / (len(queryData)*k)
     ratioAvg = ratioSum / len(queryData)
@@ -135,9 +136,9 @@ def testLsh (data, queryData, w, nbTab, nbProj, k):
     return precision, ratioAvg
 
 
-#fonction testant l ensemble des param lsh 
-#imprime les valeurs de la precision et du ratio, et trace les courbes correspondantes
-def testCompletLsh (data) :
+# fonction testant l ensemble des param lsh
+# imprime les valeurs de la precision et du ratio, et trace les courbes correspondantes
+def testCompletLsh(data):
     queryData = buildQueryData()
     print("Test de l'influence de W")
     # Influence du facteur W -------------------------------------------------------------------------------------
@@ -150,7 +151,7 @@ def testCompletLsh (data) :
     for w in w_values:
 
         print("Valeur de W:%f" % w)
-        res = testLsh(data, queryData, w, 5, 8, 5)  
+        res = testLsh(data, queryData, w, 5, 8, 5)
 
         precisions.append(res[0])
         print("precision: %f" % res[0])
@@ -159,23 +160,24 @@ def testCompletLsh (data) :
         print("ratio data: %f" % res[1])
 
     # courbe de la précision en fonction de W
-    plt.plot(w_values, precisions, label="Infleunce W sur precision", color="blue")
+    plt.plot(w_values, precisions,
+             label="Infleunce W sur precision", color="blue")
     plt.legend()
     plt.show()
 
     # courbe du nombre de données inspectés en moyenne en fonction de W
-    plt.plot(w_values, ratioAvgs, label="Influence W sur nbre d'elements inspectes", color="blue")
+    plt.plot(w_values, ratioAvgs,
+             label="Influence W sur nbre d'elements inspectes", color="blue")
     plt.legend()
     plt.show()
-
 
     # Influence du nombre de table de hachage -------------------------------------------------------------------
     print("Test de l'influence du nombre de table de hachage")
     precisions = []
     ratioAvgs = []
-    for nt in range(1,11):
+    for nt in range(1, 11):
         print("Nombre de tables:%d" % nt)
-        res = testLsh(data, queryData, 0.065 , nt, 8, 5)
+        res = testLsh(data, queryData, 0.065, nt, 8, 5)
 
         precisions.append(res[0])
         print("precision: %f" % res[0])
@@ -183,14 +185,15 @@ def testCompletLsh (data) :
         ratioAvgs.append(res[1])
         print("ratio data : %f" % res[1])
 
-    plt.plot(range(1,11), precisions, label="Influence nb tab sur precision", color="blue")
+    plt.plot(range(1, 11), precisions,
+             label="Influence nb tab sur precision", color="blue")
     plt.legend()
     plt.show()
 
-    plt.plot(range(1,11), ratioAvgs, label="Influence nb tab sur inspected avgs", color="blue")
+    plt.plot(range(1, 11), ratioAvgs,
+             label="Influence nb tab sur inspected avgs", color="blue")
     plt.legend()
     plt.show()
-
 
     # Comportement en fonction du nbre de projection ------------------------------------------------------------
     print("Test de l'influence du nombre de projection")
@@ -207,11 +210,12 @@ def testCompletLsh (data) :
         ratioAvgs.append(res[1])
         print("Ratio data : %f" % res[1])
 
-    plt.plot(range(1,20), precisions, label="Influence nb proj sur precision", color="blue")
+    plt.plot(range(1, 20), precisions,
+             label="Influence nb proj sur precision", color="blue")
     plt.legend()
     plt.show()
 
-    plt.plot(range(1,20), ratioAvgs, label="Influence nb proj sur inspected avgs", color="blue")
+    plt.plot(range(1, 20), ratioAvgs,
+             label="Influence nb proj sur inspected avgs", color="blue")
     plt.legend()
     plt.show()
-

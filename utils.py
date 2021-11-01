@@ -2,7 +2,7 @@ import cv2 as cv
 import numpy as np
 
 
-#fonction qui calcule le vector histographique d une image passee en parametre
+# fonction qui calcule le vector histographique d une image passee en parametre
 def computeHistoVector(inputImage):
 
     rHisto = cv.calcHist([inputImage], [0], None, [256], [0, 256])
@@ -22,7 +22,7 @@ def computeHistoVector(inputImage):
     return histo
 
 
-#fonctionne qui retourne une image dont le path est passe en parametre
+# fonctionne qui retourne une image dont le path est passe en parametre
 def getImage(path, debug):
 
     try:

@@ -12,9 +12,9 @@ import utils as utils
 debug = False
 debugPlus = False
 
-queryPath = "./data/small/queries/3613323772_d15cef66d1.jpg" #Path de l'image requete
-databasePath = "./data/big/images" #Path de la base de donnée
-numpyPath = Path("./savebig.npy") #Path et nom du fichier de sauvegarde numpy
+queryPath = "./data/small/queries/3613323772_d15cef66d1.jpg"  # Path de l'image requete
+databasePath = "./data/big/images"  # Path de la base de donnée
+numpyPath = Path("./savebig.npy")  # Path et nom du fichier de sauvegarde numpy
 
 database = []
 i = 0
@@ -65,7 +65,8 @@ else:
 
             print("[DEBUG] Path actuel : "+path)
 
-        allDataHisto[i] = utils.computeHistoVector(utils.getImage((path), debugPlus))
+        allDataHisto[i] = utils.computeHistoVector(
+            utils.getImage((path), debugPlus))
         i += 1
 
     if debug:
@@ -150,7 +151,7 @@ for i in range(len(lshRes[0])):
           str(database[lshRes[1][i]])+" distance : "+str(lshRes[0][i]))
 
 
-#ACP Brutte 
+# ACP Brutte
 dimensionArivee = 100
 pca = PCA(n_components=dimensionArivee)
 dataPCA = pca.fit_transform(allDataHisto)
@@ -181,7 +182,7 @@ for i in range(len(resBruteRadiusACP[0])):
 
 # Test -------------------------------------------------------------------------------------------------
 
-#NE PAS LANCER UN TEST INDIVIDUEL ET D ENSEMBLE EN MEME TEMPS !!!!!
+# NE PAS LANCER UN TEST INDIVIDUEL ET D ENSEMBLE EN MEME TEMPS !!!!!
 
 # test individuel
 #w = 0.065
@@ -190,7 +191,7 @@ for i in range(len(resBruteRadiusACP[0])):
 #
 #print("test lsh w = %f , nb tab = %f , nb proj = %f" %(w, nbTab,nbProj ))
 #res = tests.testLsh(allDataHisto,tests.buildQueryData(), w, nbTab, nbProj, 5)
-#print(res)
+# print(res)
 
-#test sur l'ensemble des paramètres avec graphe
-#tests.testCompletLsh(allDataHisto)
+# test sur l'ensemble des paramètres avec graphe
+# tests.testCompletLsh(allDataHisto)

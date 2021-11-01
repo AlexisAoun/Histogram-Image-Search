@@ -121,10 +121,10 @@ class LSH:
         matches = np.array(list(matches))
         if len(matches) > 0:
             t1 = tm.time()
-            if len(matches) <= k :
+            if len(matches) <= k:
                 m, distances = knn_search(
                     self._data[matches], query, k=len(matches)-1, dist="L2")
-            else :
+            else:
                 m, distances = knn_search(
                     self._data[matches], query, k=k, dist="L2")
 
