@@ -1,19 +1,20 @@
 from sklearn.decomposition import PCA
-import lsh as LSH
-import os
-from pathlib import Path
+from sklearn.neighbors import NearestNeighbors
+from matplotlib import pyplot as plt
 import cv2 as cv
 import numpy as np
-from matplotlib import pyplot as plt
-import distance as dist
 import timeit
+import os
+
+import lsh as LSH
+import distance as dist
 import utils as utils
 
-testQueryFolderPath = "./data/small/queries"
+testQueryFolderPath = "./data/big/queries"
 testQueryDatabase = []
 testQuerySize = 0
 
-def buildQueryData():
+def buildQueryData(debug = False):
 
     i = 0
     for entry in os.scandir(testQueryFolderPath):
@@ -29,7 +30,10 @@ def buildQueryData():
 
     for path in testQueryDatabase :
 
-        print(str(path))
+        if debug :
+
+            print("[DEBUG] "+str(path))
+
         testQueryData[i] = utils.computeHistoVector(utils.getImage(path, False))
         i+=1
     
@@ -93,30 +97,48 @@ def testAcp(allDataHisto, histoQuery, databasePath, queryPath):
 
 def testLsh (data) :
     queryData = buildQueryData()
-    # Influence du facteur W
-    #TODO compute true value with already coded brute algorithm
 
-    max = 3
-    w_values = [0.25 * i for i in range(1, max)]
+    bf = NearestNeighbors(n_neighbors=1, algorithm="brute")
+    bf.fit(data)
+    ground_results = bf.kneighbors(queryData, n_neighbors=1)
+    ground_indices = ground_results[1]
+
+    # Influence du facteur W
+
+    max = 11
+    w_values = [0.05 * i for i in range(1, max)]
     precisions = []
     inspected_avgs = []
+
     for w in w_values:
+
         print("Valeur de W:%f" % w)
-        lsh = LSH.LSH(nb_projections=10, nb_tables=2, w=w)
+        lsh = LSH.LSH(nb_projections=20, nb_tables=8, w=w)
         lsh.fit(data)
         match_count = 0
         inspected_count = 0
-        for i, query in enumerate(queryData):
-            lsh_result = lsh.kneighbors(query, k=1)
-            lsh_index = lsh_result[1][0]
-            match_count += 1 if lsh_index == ground_indices[i] else 0
+
+        for query in queryData:
+
+            valeurTerrain = dist.knn_search(data, query, k=5)
+            lsh_result = lsh.kneighbors(query, k=5)
+
+            lsh_index = lsh_result[1]
             inspected_count += lsh_result[2]
 
-        precision = match_count / len(queryData) #same as dataQuerySize ??
+            valeurTerrainIndex = valeurTerrain[0]
+
+            for i in range(5):
+                for j in range(5):
+                    if lsh_index[i] == valeurTerrainIndex[j]:
+                        match_count+=1
+            
+
+        precision = match_count / (len(queryData)*5)
         precisions.append(precision)
         print("precision: %f" % precision)
 
-        inspected_avg = inspected_count / len(pr_glove)
+        inspected_avg = inspected_count / len(queryData)
         inspected_avgs.append(inspected_avg)
         print("inspected data: %f" % inspected_avg)
 
@@ -126,10 +148,10 @@ def testLsh (data) :
     plt.show()
 
     # courbe du nombre de données inspectés en moyenne en fonction de W
-    plt.plot(w_values, inspected_avg, label="W", color="blue")
+    plt.plot(w_values, inspected_avgs, label="W", color="blue")
     plt.legend()
     plt.show()
-
+'''
     # Influence du nombre de table de hachage
     precisions = []
     ratio_avgs = []
@@ -179,3 +201,5 @@ def testLsh (data) :
 
             precision = match_count / len(red_pr_glove)
             print("precision: %f" % precision)
+
+'''
