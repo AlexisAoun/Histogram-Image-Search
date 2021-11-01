@@ -14,6 +14,8 @@ testQueryFolderPath = "./data/big/queries"
 testQueryDatabase = []
 testQuerySize = 0
 
+
+#fonction construisant le tableau de vecteurs des images dans le dossier query specifier dans testQueryFolderPath
 def buildQueryData(debug = False):
 
     i = 0
@@ -40,6 +42,7 @@ def buildQueryData(debug = False):
     return testQueryData
 
 
+#fonction de test acp
 def testAcp(allDataHisto, histoQuery, databasePath, queryPath):
 
     dimMax = 150
@@ -95,6 +98,9 @@ def testAcp(allDataHisto, histoQuery, databasePath, queryPath):
     plt.grid()
     plt.show()
 
+
+#fonction testant un tableau de vecteur query avec les param LSH specifier
+#retourne la precision et le ration de vecteur inspecte
 def testLsh (data, queryData, w, nbTab, nbProj, k):
     precisions = []
     insptected_avg = []
@@ -129,9 +135,10 @@ def testLsh (data, queryData, w, nbTab, nbProj, k):
     return precision, ratioAvg
 
 
+#fonction testant l ensemble des param lsh 
+#imprime les valeurs de la precision et du ratio, et trace les courbes correspondantes
 def testCompletLsh (data) :
     queryData = buildQueryData()
-    '''
     print("Test de l'influence de W")
     # Influence du facteur W -------------------------------------------------------------------------------------
     max = 20
@@ -184,8 +191,6 @@ def testCompletLsh (data) :
     plt.legend()
     plt.show()
 
-
-    '''
 
     # Comportement en fonction du nbre de projection ------------------------------------------------------------
     print("Test de l'influence du nombre de projection")

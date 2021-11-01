@@ -1,22 +1,20 @@
 from sklearn.decomposition import PCA
-import lsh as LSH
-import os
 from pathlib import Path
-import cv2 as cv
+import os
+
+import lsh as LSH
 import numpy as np
-from matplotlib import pyplot as plt
 import distance as dist
-import timeit
 import tests as tests
 import utils as utils
 
 
-debug = True
+debug = False
 debugPlus = False
 
-queryPath = "./data/small/queries/3613323772_d15cef66d1.jpg"
-databasePath = "./data/big/images"
-numpyPath = Path("./savebig.npy")
+queryPath = "./data/small/queries/3613323772_d15cef66d1.jpg" #Path de l'image requete
+databasePath = "./data/big/images" #Path de la base de donnée
+numpyPath = Path("./savebig.npy") #Path et nom du fichier de sauvegarde numpy
 
 database = []
 i = 0
@@ -113,6 +111,79 @@ if debug:
 
 # Recherche ---------------------------------------------------------------------------------------------
 
+# Brute force : meilleurs resultats possibles
+
+resBruteKnnL2 = dist.knn_search(allDataHisto, histoQuery, k=3)
+resBruteRadiusL2 = dist.radius_search(allDataHisto, histoQuery, r=0.5)
+
+print("Image requete : "+str(queryPath))
+
+print("Brute force knn L2")
+
+for i in range(len(resBruteKnnL2[0])):
+
+    print("- Resultat "+str(i)+" : " +
+          str(database[resBruteKnnL2[0][i]])+" distance : "+str(resBruteKnnL2[1][i]))
+
+print("")
+print("Brute force radius L2")
+for i in range(len(resBruteRadiusL2[0])):
+
+    print("- Resultat "+str(i)+" : " +
+          str(database[resBruteRadiusL2[0][i]])+" distance : "+str(resBruteRadiusL2[1][i]))
+
+
+# LSH
+w = 0.065
+nbProjections = 6
+nbTabHash = 3
+
+print("")
+print("Recherche LSH : W = "+str(w)+" nb projections : "+str(nbProjections))
+
+lsh = LSH.LSH(nb_projections=nbProjections, nb_tables=nbTabHash, w=w)
+lsh.fit(allDataHisto)
+lshRes = lsh.kneighbors(histoQuery)
+
+for i in range(len(lshRes[0])):
+    print("- Resultat "+str(i)+" : " +
+          str(database[lshRes[1][i]])+" distance : "+str(lshRes[0][i]))
+
+
+#ACP Brutte 
+dimensionArivee = 100
+pca = PCA(n_components=dimensionArivee)
+dataPCA = pca.fit_transform(allDataHisto)
+
+histoQueryPCA = histoQuery - pca.mean_
+VecteurP = pca.components_
+histoQueryPCA = histoQueryPCA@VecteurP.T
+
+resBruteKnnACP = dist.knn_search(dataPCA, histoQueryPCA, k=3)
+resBruteRadiusACP = dist.radius_search(dataPCA, histoQueryPCA, r=0.4)
+
+print("")
+print("Image requete : "+str(queryPath))
+
+print("Recherche knn ACP n dimensions : "+str(dimensionArivee))
+for i in range(len(resBruteKnnACP[0])):
+
+    print("- Resultat "+str(i)+" : " +
+          str(database[resBruteKnnACP[0][i]])+" distance : "+str(resBruteKnnACP[1][i]))
+
+
+print("")
+print("Recherche radius L2 ACP")
+for i in range(len(resBruteRadiusACP[0])):
+
+    print("- Resultat "+str(i)+" : " +
+          str(database[resBruteRadiusACP[0][i]])+" distance : "+str(resBruteRadiusACP[1][i]))
+
+# Test -------------------------------------------------------------------------------------------------
+
+#NE PAS LANCER UN TEST INDIVIDUEL ET D ENSEMBLE EN MEME TEMPS !!!!!
+
+# test individuel
 #w = 0.065
 #nbTab = 3
 #nbProj = 6
@@ -121,4 +192,5 @@ if debug:
 #res = tests.testLsh(allDataHisto,tests.buildQueryData(), w, nbTab, nbProj, 5)
 #print(res)
 
-tests.testCompletLsh(allDataHisto)
+#test sur l'ensemble des paramètres avec graphe
+#tests.testCompletLsh(allDataHisto)
