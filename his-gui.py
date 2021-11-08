@@ -33,7 +33,6 @@ def resizeImage(width, height, index):
 
 
 def resizeAllImages(width):
-    print(queryPath)
     if queryPath is not None:
         resizeImage(
             width=int(width / 4), height=int((width / 4) / queryImageRatio), index=-1
@@ -47,7 +46,9 @@ def resizeAllImages(width):
 
 def windowChangeCallback(self):
     root.update()
+    global winWidth
     if winWidth != root.winfo_width():
+        winWidth = root.winfo_width()
         resizeAllImages(root.winfo_width())
 
 
@@ -58,6 +59,7 @@ root.geometry("1000x1000")
 
 root.update()
 winWidth = root.winfo_width()
+root.minsize(width=800, height=800)
 
 queryPath = None
 queryImageRatio = None
