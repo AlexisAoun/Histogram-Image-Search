@@ -19,6 +19,9 @@ resultsFrame = ttk.Frame(mainframe)
 mainframe.grid(column=0, row=0)
 resultsFrame.grid(column=0, row=1)
 
+root.update()
+winWidth = root.winfo_width()
+
 images = []
 imageLabels = []
 imageRatios = []
@@ -40,16 +43,14 @@ def resizeImage(width, height, index):
     imageLabels[index].image = imageResized
 
 
-def resizeAllImages():
-    root.update()
-    winWidth = root.winfo_width()
+def resizeAllImages(width):
     for i in range(len(paths)):
         resizeImage(
-            width=int(winWidth / 4), height=int((winWidth / 4) / imageRatios[i]), index=i
+            width=int(width / 4), height=int((width / 4) / imageRatios[i]), index=i
         )
-    resultsFrame.configure(padding=((1/4*winWidth)/2,3,3,0))
+    resultsFrame.configure(padding=((1/4*width)/2,3,3,0))
 
-resizeAllImages()
+resizeAllImages(winWidth)
 
 imageLabels[0].grid(column=2, row=1)
 imageLabels[1].grid(column=1, row=2)
@@ -59,11 +60,11 @@ imageLabels[3].grid(column=3, row=2)
 # TODO : Make image size responsive (by taking width and height of window and update size
 # of images)
 
-def resizeImageCallback():
-    resizeImage(200, 200, 3)
+def windowChangeCallback(self):
+    root.update()
+    if winWidth != root.winfo_width():
+        resizeAllImages(root.winfo_width())
 
-button = ttk.Button(mainframe, text="resize", command=resizeImageCallback).grid(
-    column=2, row=3
-)
+root.bind('<Configure>', windowChangeCallback)
 
 root.mainloop()
