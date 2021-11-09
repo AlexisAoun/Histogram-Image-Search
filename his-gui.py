@@ -33,14 +33,15 @@ def resizeImage(width, height, index):
 
 
 def resizeAllImages(width):
-    if queryPath is not None:
-        resizeImage(
-            width=int(width / 6), height=int((width / 6) / queryImageRatio), index=-1
-        )
-    for i in range(len(paths)):
-        resizeImage(
-            width=int(width / 4), height=int((width / 4) / imageRatios[i]), index=i
-        )
+    if paths is not None:
+        if queryPath is not None:
+            resizeImage(
+                width=int(width / 6), height=int((width / 6) / queryImageRatio), index=-1
+            )
+        for i in range(len(paths)):
+            resizeImage(
+                width=int(width / 4), height=int((width / 4) / imageRatios[i]), index=i
+            )
     resultsFrame.configure(padding=((1 / 4 * width) / 2, 3, 3, 0))
 
 
@@ -51,6 +52,17 @@ def windowChangeCallback(self):
         winWidth = root.winfo_width()
         resizeAllImages(root.winfo_width())
 
+def displayResults():
+    i = 0
+    for path in paths:
+        image = ImageTk.PhotoImage(Image.open(path))
+        imageLabel[i].config(image=image) 
+        imageLabel[i].image=image
+        imageRatio = image.width() / image.height()
+
+        images.append(image)
+        imageRatios.append(imageRatio)
+        i+=1
 
 # Initialisation de l'interface
 root = Tk()
@@ -61,14 +73,10 @@ root.update()
 winWidth = root.winfo_width()
 root.minsize(width=800, height=800)
 
+numOfResults = 4
 queryPath = None
 queryImageRatio = None
-paths = [
-    "data/small/queries/96978713_775d66a18d.jpg",
-    "data/small/queries/3178371973_60c6b8f110.jpg",
-    "data/small/queries/3074617663_2f2634081d.jpg",
-    "data/small/queries/1924234308_c9ddcf206d.jpg",
-]
+paths = None
 
 mainframe = ttk.Frame(root)
 resultsFrame = ttk.Frame(mainframe)
@@ -102,14 +110,9 @@ images = []
 imageLabels = []
 imageRatios = []
 
-for path in paths:
-    image = ImageTk.PhotoImage(Image.open(path))
-    imageLabel = ttk.Label(resultsFrame, image=image)
-    imageRatio = image.width() / image.height()
-
-    images.append(image)
+for i in range(numOfResults):
+    imageLabel = ttk.Label(resultsFrame, text="No results")
     imageLabels.append(imageLabel)
-    imageRatios.append(imageRatio)
 
 
 resizeAllImages(winWidth)
