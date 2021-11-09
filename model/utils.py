@@ -23,7 +23,7 @@ def computeHistoVector(inputImage):
 
 
 # fonctionne qui retourne une image dont le path est passe en parametre
-def getImage(path, debug):
+def getImage(path, debug=False):
 
     try:
 
