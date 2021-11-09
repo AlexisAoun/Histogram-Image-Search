@@ -4,7 +4,7 @@ from utils import *
 
 class Database:
     __path = "" 
-    __imagePaths = []
+    __imagesPaths = []
     __vectors = None
     __name = ""
     __savePath = ""
@@ -18,16 +18,15 @@ class Database:
 
         #generate array containing the paths of all the entries on our database
         tmp = self.generateImageNames(self.__path)
-        self.__imagePaths = tmp[0]
+        self.__imagesPaths = tmp[0]
         self.__size = tmp[1]
 
         #check wether the database is already saved
         if self.__savePath.is_file():
             self.__vectors = np.load(str(self.__savePath))
         else:
-            self.__vectors = self.generateVectors(self.__imagePaths, self.__size)
+            self.__vectors = self.generateVectors(self.__imagesPaths, self.__size)
             
-
     # args: path of the database
     # return: array with the paths of all elements in the databse (png and/or jpg)
     def generateImageNames(self, path):
@@ -39,7 +38,6 @@ class Database:
                 size += 1
 
         return output, size
-
 
     # args: paths: array of the paths of all the elements
     #        size: size of the database
@@ -58,5 +56,5 @@ class Database:
         return self.__vectors
 
     def getImagePaths(self):
-        return self.__imagePaths     
+        return self.__imagesPaths     
 
