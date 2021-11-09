@@ -54,5 +54,9 @@ class Database:
         
         return output
 
+    def getVectors(self):
+        return self.__vectors
 
+    def getImagePaths(self):
+        return self.__imagePaths     
 
