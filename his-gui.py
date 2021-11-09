@@ -35,7 +35,7 @@ def resizeImage(width, height, index):
 def resizeAllImages(width):
     if queryPath is not None:
         resizeImage(
-            width=int(width / 4), height=int((width / 4) / queryImageRatio), index=-1
+            width=int(width / 6), height=int((width / 6) / queryImageRatio), index=-1
         )
     for i in range(len(paths)):
         resizeImage(
@@ -73,7 +73,7 @@ paths = [
 mainframe = ttk.Frame(root)
 resultsFrame = ttk.Frame(mainframe)
 searchFrame = ttk.Frame(mainframe)
-queryFrame = ttk.Frame(mainframe, padding=(0, 100, 0, 0))
+queryFrame = ttk.Frame(mainframe, padding=(0, 50, 0, 0))
 
 mainframe.grid(column=0, row=0)
 resultsFrame.grid(column=0, row=1)
