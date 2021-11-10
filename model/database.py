@@ -10,7 +10,6 @@ class Database:
     __savePath = ""
     __size = 0
 
-
     def __init__(self, name, path, savePath):
         self.__name = name
         self.__path = path 
@@ -26,6 +25,8 @@ class Database:
             self.__vectors = np.load(str(self.__savePath))
         else:
             self.__vectors = self._generateVectors(self.__imagesPaths, self.__size)
+            #then save the database in a numpy file
+            np.save(self.__savePath, self.__vectors)
             
     # args: path of the database
     # return: array with the paths of all elements in the databse (png and/or jpg)

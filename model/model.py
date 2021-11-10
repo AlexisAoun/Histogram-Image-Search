@@ -68,3 +68,4 @@ class Model:
 
     def setDatabase(self, newDBName, newDBPath, newSavePath):
         self.__database = Database(newDBName, newDBPath, newSavePath)
+

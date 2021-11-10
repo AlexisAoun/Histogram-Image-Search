@@ -42,3 +42,4 @@ def radius_search(data, query, r=1., norm='L2'):
     indices = np.where(distances <= r)[0]
 
     return indices, distances[indices]
+

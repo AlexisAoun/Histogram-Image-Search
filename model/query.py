@@ -13,4 +13,3 @@ class Query:
     def getVector(self):
         return self.__vector
 
-

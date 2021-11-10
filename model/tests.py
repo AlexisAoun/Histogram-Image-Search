@@ -219,3 +219,4 @@ def testCompletLsh(data):
              label="Influence nb proj sur inspected avgs", color="blue")
     plt.legend()
     plt.show()
+
