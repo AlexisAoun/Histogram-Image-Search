@@ -11,7 +11,7 @@ class Database:
     __size = 0
 
 
-    def __init__(self, name, path, savePath="."):
+    def __init__(self, name, path, savePath):
         self.__name = name
         self.__path = path 
         self.__savePath = savePath + "/" + self.__name + ".npy" 
