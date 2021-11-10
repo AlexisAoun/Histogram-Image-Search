@@ -17,7 +17,7 @@ class Database:
         self.__savePath = savePath + "/" + self.__name + ".npy" 
 
         #generate array containing the paths of all the entries on our database
-        tmp = self.generateImageNames(self.__path)
+        tmp = self._generateImageNames(self.__path)
         self.__imagesPaths = tmp[0]
         self.__size = tmp[1]
 
@@ -25,11 +25,11 @@ class Database:
         if self.__savePath.is_file():
             self.__vectors = np.load(str(self.__savePath))
         else:
-            self.__vectors = self.generateVectors(self.__imagesPaths, self.__size)
+            self.__vectors = self._generateVectors(self.__imagesPaths, self.__size)
             
     # args: path of the database
     # return: array with the paths of all elements in the databse (png and/or jpg)
-    def generateImageNames(self, path):
+    def _generateImageNames(self, path):
         output = []
         size = 0
         for entry in os.scandir(path):
@@ -42,7 +42,7 @@ class Database:
     # args: paths: array of the paths of all the elements
     #        size: size of the database
     # return: array of the vectors of all the images in the database
-    def generateVectors(self, paths, size):
+    def _generateVectors(self, paths, size):
         output = np.ndarray(shape=(size, 768))
         i = 0
 
