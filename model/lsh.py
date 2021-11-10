@@ -131,4 +131,4 @@ class LSH:
         else:
             m = []
             distances = []
-        return distances, matches[m], len(matches)
+        return  matches[m], distances, len(matches)
