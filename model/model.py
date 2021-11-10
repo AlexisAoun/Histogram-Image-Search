@@ -14,8 +14,9 @@ class Model:
         self.__numberOfRes = numberOfRes
 
     # args: type of search : 0 - Most accurate search by brute force, slowest search not suitable on large data set
-    #                        1 - Quicker search with an accuracy of 80%, using LSH and all the dimensions 
-    # return: Search results tuple of indexes of the results and the respective distances to query
+    #                        1 - Quicker search with an accuracy of 80%, using LSH and all the dimensions, with a 
+    #                            set of tested and fixed parameters
+    # return: Search results : tuple of indexes of the results and the respective distances to query
     #         returns number of solutions if search 1 is chosen
     def search(self, typeOfSearch = 0):
         res = -1
