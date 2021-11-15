@@ -85,3 +85,38 @@ class Gui(View):
         for i in range(1, self.__userNumRes):
             tmp = ttk.Label(self.__resultsFrame)
             self.__imageLabels.append(tmp)
+
+        self.__imageLabels[0].grid(column=2, row=1)
+        self.__imageLabels[1].grid(column=1, row=2)
+        self.__imageLabels[2].grid(column=2, row=2)
+        self.__imageLabels[3].grid(column=3, row=2)
+
+
+    def _resizeImage(self, width, height, index):
+        if index == -1:
+            data = Image.open(self.__userQueryPath)
+            dataResized = data.resize((width, height), Image.ANTIALIAS)
+            imageResized = ImageTk.PhotoImage(dataResized)
+            self.__queryLabel.configure(image=imageResized)
+            self.__queryLabel.image = imageResized
+        else:
+            data = Image.open(self.__userDbpath[index])
+            dataResized = data.resize((width, height), Image.ANTIALIAS)
+            imageResized = ImageTk.PhotoImage(dataResized)
+            self.__imageLabels[index].configure(image=imageResized)
+            self.__imageLabels[index].image = imageResized
+
+    #TODO adapt this function to the new refactor, !!! replace userDBPath by resToDisplay
+    def resizeAllImages(self):
+        if self.__resToDisplay is not None:
+            if self.__userQueryPath is not None:
+                self._resizeImage(
+                    width=int(self.__winWidth / 6),
+                    height=int((self.__winWidth / 6) / queryImageRatio),
+                    index=-1,
+                )
+            for i in range(len(self.__resToDisplay)):
+                self._resizeImage(
+                    width=int(self.__winWidth / 4), height=int((self.__winWidth / 4) / imageRatios[i]), index=i
+                )
+        resultsFrame.configure(padding=((1 / 4 * self.__winWidth) / 2, 3, 3, 0))
