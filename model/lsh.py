@@ -6,7 +6,6 @@ from distance import knn_search
 
 
 class _LSHEntry:
-
     def __init__(self, data_id, signature):
         self._data_id = data_id
         self._signature = signature
@@ -45,25 +44,34 @@ class LSH:
 
     def _generate_vector_projections(self, dimension):
         self._vector_projections = np.random.normal(
-            0, 1, (self._nb_tables, self._nb_projections, dimension))
+            0, 1, (self._nb_tables, self._nb_projections, dimension)
+        )
         self._vector_projections = (
-            self._vector_projections.T / np.linalg.norm(self._vector_projections, axis=2).T).T
+            self._vector_projections.T
+            / np.linalg.norm(self._vector_projections, axis=2).T
+        ).T
         self._bias = np.random.uniform(
-            0, self._w, (self._nb_tables, self._nb_projections))
+            0, self._w, (self._nb_tables, self._nb_projections)
+        )
 
     def _generate_signature_projections(self):
         self._signature_projections = np.random.uniform(
-            0, np.random.uniform(0, 2 << 32), (self._nb_projections,)).astype(np.int32)
+            0, np.random.uniform(0, 2 << 32), (self._nb_projections,)
+        ).astype(np.int32)
 
     def _hash_vector(self, x):
-        return ((np.dot(self._vector_projections, x) + self._bias) / self._w).astype(np.int32)
+        return ((np.dot(self._vector_projections, x) + self._bias) / self._w).astype(
+            np.int32
+        )
 
     def _hash_vector_signatures(self, q):
-        return np.abs((np.dot(q, self._signature_projections).astype(np.int64) % self._HASH_PRIME) % self._TABLE_LENGTH)
+        return np.abs(
+            (np.dot(q, self._signature_projections).astype(np.int64) % self._HASH_PRIME)
+            % self._TABLE_LENGTH
+        )
 
     def _build_tables(self):
-        self._tables = np.empty(
-            (self._nb_tables, self._TABLE_LENGTH), dtype=np.object)
+        self._tables = np.empty((self._nb_tables, self._TABLE_LENGTH), dtype=np.object)
         for i in range(self._nb_tables):
             for j in range(self._TABLE_LENGTH):
                 self._tables[i, j] = []
@@ -87,7 +95,9 @@ class LSH:
         for i, d in enumerate(data):
             signatures = self._hash_vector(d)
             hashs = self._hash_vector_signatures(signatures)
-            for t, bucket in enumerate(self._tables[np.arange(len(self._tables)), hashs]):
+            for t, bucket in enumerate(
+                self._tables[np.arange(len(self._tables)), hashs]
+            ):
                 bucket.append((i, signatures[t]))
 
     def kneighbors(self, query, k=1):
@@ -112,7 +122,9 @@ class LSH:
         # Get matches from buckets
         matches = set()
         t1 = tm.time()
-        for signature, bucket in zip(signatures, self._tables[np.arange(len(self._tables)), hashs]):
+        for signature, bucket in zip(
+            signatures, self._tables[np.arange(len(self._tables)), hashs]
+        ):
             for e in bucket:
                 #                               if (e[1] == signature).all():
                 matches.add(e[0])
@@ -123,13 +135,12 @@ class LSH:
             t1 = tm.time()
             if len(matches) <= k:
                 m, distances = knn_search(
-                    self._data[matches], query, k=len(matches)-1, dist="L2")
+                    self._data[matches], query, k=len(matches) - 1, dist="L2"
+                )
             else:
-                m, distances = knn_search(
-                    self._data[matches], query, k=k, dist="L2")
+                m, distances = knn_search(self._data[matches], query, k=k, dist="L2")
 
         else:
             m = []
             distances = []
-        return  matches[m], distances, len(matches)
-
+        return matches[m], distances, len(matches)

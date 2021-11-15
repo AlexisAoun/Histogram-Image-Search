@@ -2,8 +2,9 @@ import os
 
 from utils import *
 
+
 class Database:
-    __path = "" 
+    __path = ""
     __imagesPaths = []
     __vectors = None
     __name = ""
@@ -12,29 +13,31 @@ class Database:
 
     def __init__(self, name, path, savePath):
         self.__name = name
-        self.__path = path 
-        self.__savePath = savePath + "/" + self.__name + ".npy" 
+        self.__path = path
+        self.__savePath = savePath + "/" + self.__name + ".npy"
 
-        #generate array containing the paths of all the entries on our database
+        # generate array containing the paths of all the entries on our database
         tmp = self._generateImageNames(self.__path)
         self.__imagesPaths = tmp[0]
         self.__size = tmp[1]
 
-        #check wether the database is already saved
+        # check wether the database is already saved
         if self.__savePath.is_file():
             self.__vectors = np.load(str(self.__savePath))
         else:
             self.__vectors = self._generateVectors(self.__imagesPaths, self.__size)
-            #then save the database in a numpy file
+            # then save the database in a numpy file
             np.save(self.__savePath, self.__vectors)
-            
+
     # args: path of the database
     # return: array with the paths of all elements in the databse (png and/or jpg)
     def _generateImageNames(self, path):
         output = []
         size = 0
         for entry in os.scandir(path):
-            if (entry.path.endswith(".jpg") or entry.path.endswith(".png")) and entry.is_file():
+            if (
+                entry.path.endswith(".jpg") or entry.path.endswith(".png")
+            ) and entry.is_file():
                 output.append(str(entry.path))
                 size += 1
 
@@ -50,12 +53,11 @@ class Database:
         for path in paths:
             output[i] = computeHistoVector(getImage((path)))
             i += 1
-        
+
         return output
 
     def getVectors(self):
         return self.__vectors
 
     def getImagePaths(self):
-        return self.__imagesPaths     
-
+        return self.__imagesPaths

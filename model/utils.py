@@ -46,4 +46,3 @@ def getImage(path, debug=False):
         print("[DEBUG] Image chargee avec succes")
 
     return img
-

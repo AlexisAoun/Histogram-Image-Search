@@ -54,7 +54,9 @@ else:
     if debug:
 
         print("[DEBUG] [WARNING] Aucun fichier de sauvegarde numpy detecte")
-        print("[DEBUG] Traitement des images de la base de donnee - Cette operation peut prendre du temps")
+        print(
+            "[DEBUG] Traitement des images de la base de donnee - Cette operation peut prendre du temps"
+        )
 
     allDataHisto = np.ndarray(shape=(databaseSize, 768))
     i = 0
@@ -63,10 +65,9 @@ else:
 
         if debugPlus:
 
-            print("[DEBUG] Path actuel : "+path)
+            print("[DEBUG] Path actuel : " + path)
 
-        allDataHisto[i] = utils.computeHistoVector(
-            utils.getImage((path), debugPlus))
+        allDataHisto[i] = utils.computeHistoVector(utils.getImage((path), debugPlus))
         i += 1
 
     if debug:
@@ -117,21 +118,33 @@ if debug:
 resBruteKnnL2 = dist.knn_search(allDataHisto, histoQuery, k=3)
 resBruteRadiusL2 = dist.radius_search(allDataHisto, histoQuery, r=0.5)
 
-print("Image requete : "+str(queryPath))
+print("Image requete : " + str(queryPath))
 
 print("Brute force knn L2")
 
 for i in range(len(resBruteKnnL2[0])):
 
-    print("- Resultat "+str(i)+" : " +
-          str(database[resBruteKnnL2[0][i]])+" distance : "+str(resBruteKnnL2[1][i]))
+    print(
+        "- Resultat "
+        + str(i)
+        + " : "
+        + str(database[resBruteKnnL2[0][i]])
+        + " distance : "
+        + str(resBruteKnnL2[1][i])
+    )
 
 print("")
 print("Brute force radius L2")
 for i in range(len(resBruteRadiusL2[0])):
 
-    print("- Resultat "+str(i)+" : " +
-          str(database[resBruteRadiusL2[0][i]])+" distance : "+str(resBruteRadiusL2[1][i]))
+    print(
+        "- Resultat "
+        + str(i)
+        + " : "
+        + str(database[resBruteRadiusL2[0][i]])
+        + " distance : "
+        + str(resBruteRadiusL2[1][i])
+    )
 
 
 # LSH
@@ -140,15 +153,21 @@ nbProjections = 6
 nbTabHash = 3
 
 print("")
-print("Recherche LSH : W = "+str(w)+" nb projections : "+str(nbProjections))
+print("Recherche LSH : W = " + str(w) + " nb projections : " + str(nbProjections))
 
 lsh = LSH.LSH(nb_projections=nbProjections, nb_tables=nbTabHash, w=w)
 lsh.fit(allDataHisto)
 lshRes = lsh.kneighbors(histoQuery)
 
 for i in range(len(lshRes[0])):
-    print("- Resultat "+str(i)+" : " +
-          str(database[lshRes[1][i]])+" distance : "+str(lshRes[0][i]))
+    print(
+        "- Resultat "
+        + str(i)
+        + " : "
+        + str(database[lshRes[1][i]])
+        + " distance : "
+        + str(lshRes[0][i])
+    )
 
 
 # ACP Brutte
@@ -158,39 +177,51 @@ dataPCA = pca.fit_transform(allDataHisto)
 
 histoQueryPCA = histoQuery - pca.mean_
 VecteurP = pca.components_
-histoQueryPCA = histoQueryPCA@VecteurP.T
+histoQueryPCA = histoQueryPCA @ VecteurP.T
 
 resBruteKnnACP = dist.knn_search(dataPCA, histoQueryPCA, k=3)
 resBruteRadiusACP = dist.radius_search(dataPCA, histoQueryPCA, r=0.4)
 
 print("")
-print("Image requete : "+str(queryPath))
+print("Image requete : " + str(queryPath))
 
-print("Recherche knn ACP n dimensions : "+str(dimensionArivee))
+print("Recherche knn ACP n dimensions : " + str(dimensionArivee))
 for i in range(len(resBruteKnnACP[0])):
 
-    print("- Resultat "+str(i)+" : " +
-          str(database[resBruteKnnACP[0][i]])+" distance : "+str(resBruteKnnACP[1][i]))
+    print(
+        "- Resultat "
+        + str(i)
+        + " : "
+        + str(database[resBruteKnnACP[0][i]])
+        + " distance : "
+        + str(resBruteKnnACP[1][i])
+    )
 
 
 print("")
 print("Recherche radius L2 ACP")
 for i in range(len(resBruteRadiusACP[0])):
 
-    print("- Resultat "+str(i)+" : " +
-          str(database[resBruteRadiusACP[0][i]])+" distance : "+str(resBruteRadiusACP[1][i]))
+    print(
+        "- Resultat "
+        + str(i)
+        + " : "
+        + str(database[resBruteRadiusACP[0][i]])
+        + " distance : "
+        + str(resBruteRadiusACP[1][i])
+    )
 
 # Test -------------------------------------------------------------------------------------------------
 
 # NE PAS LANCER UN TEST INDIVIDUEL ET D ENSEMBLE EN MEME TEMPS !!!!!
 
 # test individuel
-#w = 0.065
-#nbTab = 3
-#nbProj = 6
+# w = 0.065
+# nbTab = 3
+# nbProj = 6
 #
-#print("test lsh w = %f , nb tab = %f , nb proj = %f" %(w, nbTab,nbProj ))
-#res = tests.testLsh(allDataHisto,tests.buildQueryData(), w, nbTab, nbProj, 5)
+# print("test lsh w = %f , nb tab = %f , nb proj = %f" %(w, nbTab,nbProj ))
+# res = tests.testLsh(allDataHisto,tests.buildQueryData(), w, nbTab, nbProj, 5)
 # print(res)
 
 # test sur l'ensemble des paramètres avec graphe
