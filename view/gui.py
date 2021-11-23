@@ -31,10 +31,12 @@ class Gui(View):
 
     __images = []
     __imageRatios = []
+    __userNumRes = 0
 
     # elements of query Frame
     __queryLabel = None
     __queryTitle = None
+    __queryImageRation = None
 
     def __init__(self, numberOfRes=4):
         self.__userNumRes = numberOfRes
@@ -100,7 +102,7 @@ class Gui(View):
             self.__queryLabel.configure(image=imageResized)
             self.__queryLabel.image = imageResized
         else:
-            data = Image.open(self.__userDbpath[index])
+            data = Image.open(self.__resToDisplay[index])
             dataResized = data.resize((width, height), Image.ANTIALIAS)
             imageResized = ImageTk.PhotoImage(dataResized)
             self.__imageLabels[index].configure(image=imageResized)
@@ -119,4 +121,10 @@ class Gui(View):
                 self._resizeImage(
                     width=int(self.__winWidth / 4), height=int((self.__winWidth / 4) / imageRatios[i]), index=i
                 )
-        resultsFrame.configure(padding=((1 / 4 * self.__winWidth) / 2, 3, 3, 0))
+        self.__resultsFrame.configure(padding=((1 / 4 * self.__winWidth) / 2, 3, 3, 0))
+
+    def displayResults(res, )
+    #I should not create the result frames on init but create on the fly after results calculations
+    #And delete old frames each time
+    #by doing this i can more easily have dynamic number of results (and not fixed to 4)
+
