@@ -31,12 +31,18 @@ class Gui(View):
 
     __images = []
     __imageRatios = []
+
     __userNumRes = 0
+    __resToDisplay = None
+    __maxNumOfRes = 6
+    __numOfRows = 0
+    __numOfColumns = 0
 
     # elements of query Frame
     __queryLabel = None
     __queryTitle = None
-    __queryImageRation = None
+    __queryImageRatio = 0
+    __queryPath = None
 
     def __init__(self, numberOfRes=4):
         self.__userNumRes = numberOfRes
@@ -114,17 +120,55 @@ class Gui(View):
             if self.__userQueryPath is not None:
                 self._resizeImage(
                     width=int(self.__winWidth / 6),
-                    height=int((self.__winWidth / 6) / queryImageRatio),
+                    height=int((self.__winWidth / 6) / self.__queryImageRatio),
                     index=-1,
                 )
             for i in range(len(self.__resToDisplay)):
                 self._resizeImage(
-                    width=int(self.__winWidth / 4), height=int((self.__winWidth / 4) / imageRatios[i]), index=i
+                    width=int(self.__winWidth / 4), 
+                    height=int((self.__winWidth / 4) / self.__imageRatios[i]), 
+                    index=i
                 )
         self.__resultsFrame.configure(padding=((1 / 4 * self.__winWidth) / 2, 3, 3, 0))
 
-    def displayResults(res, )
-    #I should not create the result frames on init but create on the fly after results calculations
-    #And delete old frames each time
-    #by doing this i can more easily have dynamic number of results (and not fixed to 4)
+    def displayResults(self, res, numOfRes):
+        #if there's results displayed destroy all the results widgets
+        if self.__resToDisplay is not None:
+            for i in range(self.__userNumRes):
+                self.__imageLabels[i].destroy() 
 
+
+        self.__userNumRes = numOfRes
+        self.__resToDisplay = res
+
+        self.__numOfRows = 1 if self.__userNumRes < 3 else 2
+        self.__numOfColumns = 1 if self.__userNumRes == 1 else 2 if self.__userNumRes < 5 else 3
+         
+        r = 0
+        c = 0
+        for i in range(self.__userNumRes):
+            tmp = ImageTk.PhotoImage(Image.open(self.__resToDisplay[i]))
+            self.__imageLables[i] = ttk.Label(self.__resultsFrame, image=tmp)
+            self.__imageRatios[i] = tmp.width() / tmp.height()
+
+            self.__imageLabels[i].grid(column=c, row=r)
+
+            if c < self.__numOfColumns:
+                c += 1 
+            else:
+                c = 0
+                if r < self.__numOfRows:
+                    r += 1 
+
+    def selectFile(self):
+        self.__queryPath = askopenfilename()
+        self.__queryLabel.configure(text=self.__queryPath)
+
+        tmp = ImageTk.PhotoImage(Image.open(self.__queryPath))
+        self.__queryLabel.configure(image=tmp)
+        self.__queryLabel.image = tmp
+
+        self.__queryImageRatio = tmp.width() / tmp.height()
+
+        self.__root.update()
+        resizeAllImages(self.__root.winfo_width())
