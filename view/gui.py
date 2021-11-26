@@ -32,8 +32,6 @@ class Gui(View):
     __images = []
     __imageRatios = []
 
-    __userNumRes = 0
-    __resToDisplay = None
     __maxNumOfRes = 6
     __numOfRows = 0
     __numOfColumns = 0
@@ -42,7 +40,6 @@ class Gui(View):
     __queryLabel = None
     __queryTitle = None
     __queryImageRatio = 0
-    __queryPath = None
 
     def __init__(self, numberOfRes=4):
         self.__userNumRes = numberOfRes
@@ -161,10 +158,10 @@ class Gui(View):
                     r += 1 
 
     def selectFile(self):
-        self.__queryPath = askopenfilename()
-        self.__queryLabel.configure(text=self.__queryPath)
+        self.__userQueryPath = askopenfilename()
+        self.__userQueryPath.configure(text=self.__userQueryPath)
 
-        tmp = ImageTk.PhotoImage(Image.open(self.__queryPath))
+        tmp = ImageTk.PhotoImage(Image.open(self.__userQueryPath))
         self.__queryLabel.configure(image=tmp)
         self.__queryLabel.image = tmp
 
