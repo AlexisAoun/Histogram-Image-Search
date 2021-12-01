@@ -1,4 +1,4 @@
-from view import View
+from .userView import UserView
 
 from tkinter import *
 from tkinter import ttk
@@ -6,7 +6,8 @@ from tkinter.filedialog import askopenfilename
 from PIL import ImageTk, Image
 
 
-class Gui(View):
+
+class Gui(UserView):
     pass
     # main window
     __root = None
@@ -69,9 +70,8 @@ class Gui(View):
         self.__pathLabel = ttk.Label(self.__searchFrame, text="Request image path")
         self.__pathLabel.grid(column=2, row=0)
 
-        self.__selectButton = ttk.Button(
-            self.__searchFrame, text="Select Image", command=selectFile
-        )
+        self.__selectButton = ttk.Button(self.__searchFrame, text="Select Image")
+
         self.__selectButton.grid(column=1, row=1)
 
         self.__resultTitle = ttk.Label(self.__searchFrame, text="Results : ")
@@ -85,16 +85,19 @@ class Gui(View):
         self.__queryTitle.grid(column=0, row=0)
 
         # initiating and placing elements in result frame
-        self.__imageLabels[0] = ttk.Label(self.__resultsFrame, text="No results")
-
-        for i in range(1, self.__userNumRes):
-            tmp = ttk.Label(self.__resultsFrame)
+        for i in range(0, self.__userNumRes):
+            if i == 0:
+                tmp = ttk.Label(self.__resultsFrame, text="No results")
+            else :
+                tmp = ttk.Label(self.__resultsFrame)
             self.__imageLabels.append(tmp)
 
         self.__imageLabels[0].grid(column=2, row=1)
         self.__imageLabels[1].grid(column=1, row=2)
         self.__imageLabels[2].grid(column=2, row=2)
         self.__imageLabels[3].grid(column=3, row=2)
+
+        self.__root.mainloop()
 
 
     def _resizeImage(self, width, height, index):
@@ -157,15 +160,3 @@ class Gui(View):
                 if r < self.__numOfRows:
                     r += 1 
 
-    def selectFile(self):
-        self.__userQueryPath = askopenfilename()
-        self.__userQueryPath.configure(text=self.__userQueryPath)
-
-        tmp = ImageTk.PhotoImage(Image.open(self.__userQueryPath))
-        self.__queryLabel.configure(image=tmp)
-        self.__queryLabel.image = tmp
-
-        self.__queryImageRatio = tmp.width() / tmp.height()
-
-        self.__root.update()
-        resizeAllImages(self.__root.winfo_width())

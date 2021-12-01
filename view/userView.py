@@ -1,4 +1,4 @@
-class View:
+class UserView:
     __userNumRes = 0
     __userQueryPath = ""
     __userDbPath = ""
